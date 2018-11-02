@@ -105,49 +105,80 @@ class CanvasState {						// Rename it to Canvas -> more OO
 		this.selectionWidth = 10
 		this.timeInterval = 30
 
-		// What is e?
-		canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
+		// // What is e?
+		// canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
 
-		// Test for my own purposes ,can you use speech marks not just apostrophes
-		canvas.addEventListener('mousedown', function(e) {
-			var mouse:any = this.mState.getMouse(e)
+		// // Test for my own purposes ,can you use speech marks not just apostrophes
+		// canvas.addEventListener('mousedown', function(e) {
+		// 	var mouse:any = this.getMouse(e)
+		// 	var mouseX:number = mouse.x
+		// 	var mouseY:number = mouse.y
+		// 	var shapes:Rectangle[] = this.mState.shapes
+		// 	var nShapes:number = shapes.length
+
+		// 	// for (var i = nShapes - 1; i >= 0; i--) { // his implementation if it doesn't work
+		// 	for (var i = 0; i < nShapes ; i++) {
+		// 		if (shapes[i].contains(mouseX, mouseY)) {
+		// 			var mSelection:Rectangle = shapes[i]							// SHould this be a let. Definitely test this tomorrow!
+		// 			this.mState.dragOffsetX = mouseX - mSelection.x
+		// 			this.mState.dragOffsetY = mouseY - mSelection.y
+		// 			this.mState.dragging = true
+		// 			this.mState.selection = mSelection
+		// 			this.mState.valid = false
+		// 			return
+		// 		}
+		// 	}
+
+		// 	if (this.mState.selection) {
+		// 		this.mState.selection = null
+		// 		this.mState.valid = false
+		// 	}
+		// }, true) 												// Why is there a true there, look up api
+
+		// canvas.addEventListener('mousemove', function(e) {
+		// 	if (this.dragging) {
+		// 		var mouse:any = this.mState.getMouse(e)
+		// 		this.mState.selection.x = mouse.x - this.mState.dragOffsetX
+		// 		this.mState.selection.y = mouse.y - this.mState.dragOffsetY
+		// 		this.mState.valid = false
+		// 	}
+		// }, true)
+
+		// canvas.addEventListener('dblclick', function(e) {
+		// 	var mouse:any = this.mState.getMouse()
+		// 	this.mState.addShape(new Rectangle(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0, 255, 0, 0.6)'))			// these hardcoded things are definitely worth changing
+		// }, true)
+	}
+
+	init() {
+		var mCanvas:CanvasState = this.mState
+		this.canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
+		
+		this.canvas.addEventListener('mousedown', function(e, Canvas:CanvasState) {
+			var mouse:any = mCanvas.getMouse(e)
 			var mouseX:number = mouse.x
 			var mouseY:number = mouse.y
-			var shapes:Rectangle[] = this.mState.shapes
+			var shapes:Rectangle[] = mCanvas.shapes
 			var nShapes:number = shapes.length
 
 			// for (var i = nShapes - 1; i >= 0; i--) { // his implementation if it doesn't work
 			for (var i = 0; i < nShapes ; i++) {
 				if (shapes[i].contains(mouseX, mouseY)) {
-					var mSelection:Rectangle = shapes[i]							// SHould this be a let. Definitely test this tomorrow!
-					this.mState.dragOffsetX = mouseX - mSelection.x
-					this.mState.dragOffsetY = mouseY - mSelection.y
-					this.mState.dragging = true
-					this.mState.selection = mSelection
-					this.mState.valid = false
+					let mSelection:Rectangle = shapes[i]							// SHould this be a let. Definitely test this tomorrow!
+					mCanvas.dragOffsetX = mouseX - mSelection.x
+					mCanvas.dragOffsetY = mouseY - mSelection.y
+					mCanvas.dragging = true
+					mCanvas.selection = mSelection
+					mCanvas.valid = false
 					return
 				}
 			}
 
-			if (this.mState.selection) {
-				this.mState.selection = null
-				this.mState.valid = false
+			if (mCanvas.selection) {
+				mCanvas.selection = null
+				mCanvas.valid = false
 			}
-		}, true) 												// Why is there a true there, look up api
-
-		canvas.addEventListener('mousemove', function(e) {
-			if (this.dragging) {
-				var mouse:any = this.mState.getMouse(e)
-				this.mState.selection.x = mouse.x - this.mState.dragOffsetX
-				this.mState.selection.y = mouse.y - this.mState.dragOffsetY
-				this.mState.valid = false
-			}
-		}, true)
-
-		canvas.addEventListener('dblclick', function(e) {
-			var mouse:any = this.mState.getMouse()
-			this.mState.addShape(new Rectangle(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0, 255, 0, 0.6)'))			// these hardcoded things are definitely worth changing
-		}, true)
+		}, true) 
 	}
 
 	addShape(shape:Rectangle) {
@@ -211,6 +242,7 @@ class CanvasState {						// Rename it to Canvas -> more OO
 }
 
 var s:CanvasState = new CanvasState(document.getElementById('canvas'))
+s.init();
 s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
 
 setInterval(function() {s.mState.draw();}, s.timeInterval)								// would love to know what this does
