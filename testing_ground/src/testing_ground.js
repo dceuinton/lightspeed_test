@@ -72,7 +72,7 @@ var CanvasState = /** @class */ (function () {
         var mCanvas = this.mState;
         this.canvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; });
         this.canvas.addEventListener("mousedown", function (e, Canvas) {
-            // console.log("MouseDown")
+            console.log("MouseDown");
             var mouse = mCanvas.getMouse(e);
             var mouseX = mouse.x;
             var mouseY = mouse.y;
@@ -91,7 +91,7 @@ var CanvasState = /** @class */ (function () {
                     return;
                 }
             }
-            if (mCanvas.selection) {
+            if (mCanvas.selection && e.button === 0) {
                 mCanvas.selection = null;
                 mCanvas.valid = false;
             }
@@ -112,25 +112,36 @@ var CanvasState = /** @class */ (function () {
                 mCanvas.valid = false;
                 return;
             }
-            if (mCanvas.selection === null) {
-                for (var i = 0; i < mCanvas.nShapes; i++) {
-                    if (mCanvas.shapes[i].beingHovered) {
-                        mCanvas.shapes[i].beingHovered = false;
-                        mCanvas.valid = false;
-                    }
-                    if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
-                        mCanvas.shapes[i].beingHovered = true;
-                        mCanvas.valid = false;
-                        // console.log("hovered")
-                        return;
-                    }
+            // if (mCanvas.selection === null) {
+            for (var i = 0; i < mCanvas.nShapes; i++) {
+                if (mCanvas.shapes[i].beingHovered) {
+                    mCanvas.shapes[i].beingHovered = false;
+                    mCanvas.valid = false;
+                }
+                if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
+                    mCanvas.shapes[i].beingHovered = true;
+                    mCanvas.valid = false;
+                    // console.log("hovered")
+                    return;
                 }
             }
+            // }
             // console.log("Still reach here")
         }, true);
+        this.canvas.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            console.log("Right Click");
+            if (mCanvas.selection) {
+                var mouse = mCanvas.getMouse(e);
+                mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width / 2, mouse.y - mCanvas.selection.height / 2, mCanvas.selection.width, mCanvas.selection.height));
+            }
+            return false;
+        }, true);
         this.canvas.addEventListener('dblclick', function (e) {
-            var mouse = mCanvas.getMouse(e);
-            mCanvas.addShape(new Rectangle(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0, 255, 0, 0.6)')); // these hardcoded things are definitely worth changing
+            if (mCanvas.selection !== null) {
+                var mouse = mCanvas.getMouse(e);
+                mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width / 2, mouse.y - mCanvas.selection.height / 2, mCanvas.selection.width, mCanvas.selection.height));
+            }
         }, true);
     };
     CanvasState.prototype.moveToFrontOfShapes = function (shapes, s, index) {

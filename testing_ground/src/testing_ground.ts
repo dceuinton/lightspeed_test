@@ -122,7 +122,7 @@ class CanvasState {						// Rename it to Canvas -> more OO
 		this.canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
 		
 		this.canvas.addEventListener("mousedown", function(e, Canvas:CanvasState) {
-			// console.log("MouseDown")
+			console.log("MouseDown")
 			let mouse:any = mCanvas.getMouse(e)
 			let mouseX:number = mouse.x
 			let mouseY:number = mouse.y
@@ -143,7 +143,7 @@ class CanvasState {						// Rename it to Canvas -> more OO
 				}
 			}
 
-			if (mCanvas.selection) {
+			if (mCanvas.selection && e.button === 0) {
 				mCanvas.selection = null
 				mCanvas.valid = false
 			}
@@ -167,7 +167,7 @@ class CanvasState {						// Rename it to Canvas -> more OO
 				return
 			} 
 
-			if (mCanvas.selection === null) {
+			// if (mCanvas.selection === null) {
 				for (let i = 0; i < mCanvas.nShapes; i++) {
 					if (mCanvas.shapes[i].beingHovered) {
 						mCanvas.shapes[i].beingHovered = false	
@@ -180,15 +180,33 @@ class CanvasState {						// Rename it to Canvas -> more OO
 						return
 					}
 				}			
-			}
+			// }
 
 			// console.log("Still reach here")
 			
 		}, true)
 
+		this.canvas.addEventListener('contextmenu', function(e) {
+			e.preventDefault();
+			console.log("Right Click")
+			if (mCanvas.selection) {
+				let mouse:any = mCanvas.getMouse(e)
+				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
+											   mouse.y - mCanvas.selection.height/2, 
+											   mCanvas.selection.width, 
+											   mCanvas.selection.height))
+			}		
+			return false
+		}, true)
+
 		this.canvas.addEventListener('dblclick', function(e) {
-			let mouse:any = mCanvas.getMouse(e)
-			mCanvas.addShape(new Rectangle(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0, 255, 0, 0.6)'))			// these hardcoded things are definitely worth changing
+			if (mCanvas.selection !== null) {
+				let mouse:any = mCanvas.getMouse(e)
+				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
+											   mouse.y - mCanvas.selection.height/2, 
+											   mCanvas.selection.width, 
+											   mCanvas.selection.height))
+			}			
 		}, true)
 	}
 
