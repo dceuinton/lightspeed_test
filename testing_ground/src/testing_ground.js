@@ -3,6 +3,9 @@ function greeter(person) {
 }
 var mName = 'Dale';
 console.log(greeter(mName));
+function prnt(message) {
+    console.log(message);
+}
 // Drawing 
 var DrawableShape = /** @class */ (function () {
     function DrawableShape(x, y, width, height) {
@@ -21,6 +24,9 @@ var Rectangle = /** @class */ (function () {
         this.selectionColor = "#105151";
         this.beingHovered = false;
         this.hoverColor = "#2EE6E6";
+        this.minWidth = 5;
+        this.minHeight = 5;
+        this.scalingFactor = 0.1;
     }
     Rectangle.prototype.draw = function (context) {
         if (this.beingHovered) {
@@ -38,6 +44,22 @@ var Rectangle = /** @class */ (function () {
         else {
             return false;
         }
+    };
+    Rectangle.prototype.scale = function (delta) {
+        var midX = this.x + this.width / 2;
+        var midY = this.y + this.height / 2;
+        var newWidth = this.width + delta;
+        var newHeight = this.height + delta;
+        if (newWidth < this.minWidth) {
+            newWidth = this.minWidth;
+        }
+        if (newHeight < this.minHeight) {
+            newHeight = this.minHeight;
+        }
+        this.x = midX - newWidth / 2;
+        this.y = midY - newHeight / 2;
+        this.width = newWidth;
+        this.height = newHeight;
     };
     return Rectangle;
 }());
@@ -104,6 +126,13 @@ var CanvasState = /** @class */ (function () {
                 mCanvas.valid = false;
             }
         }, true);
+        this.canvas.addEventListener("wheel", function (e) {
+            // prnt("Scrolling baby " + e.deltaY)
+            if (mCanvas.selection) {
+                mCanvas.selection.scale(e.deltaY * mCanvas.selection.scalingFactor * -1);
+            }
+            mCanvas.valid = false;
+        }, true);
         this.canvas.addEventListener('mousemove', function (e) {
             var mouse = mCanvas.getMouse(e);
             if (mCanvas.dragging) {
@@ -138,9 +167,14 @@ var CanvasState = /** @class */ (function () {
             return false;
         }, true);
         this.canvas.addEventListener('dblclick', function (e) {
-            if (mCanvas.selection !== null) {
-                var mouse = mCanvas.getMouse(e);
-                mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width / 2, mouse.y - mCanvas.selection.height / 2, mCanvas.selection.width, mCanvas.selection.height));
+            var mouse = mCanvas.getMouse(e);
+            for (var i = 0; i < mCanvas.nShapes; i++) {
+                if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
+                    mCanvas.selection = null;
+                    mCanvas.deleteShape(mCanvas.shapes[i]);
+                    mCanvas.valid = false;
+                    return;
+                }
             }
         }, true);
     };
@@ -156,6 +190,13 @@ var CanvasState = /** @class */ (function () {
         this.shapes.push(shape);
         this.valid = false;
         this.nShapes++;
+    };
+    CanvasState.prototype.deleteShape = function (shape) {
+        var index = this.shapes.indexOf(shape);
+        if (index > -1) {
+            this.shapes.splice(index, 1);
+        }
+        this.nShapes--;
     };
     CanvasState.prototype.clear = function () {
         this.context.clearRect(0, 0, this.width, this.height);

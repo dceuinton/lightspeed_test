@@ -4,10 +4,11 @@ function greeter(person: string) {
 let mName: string = 'Dale'
 console.log(greeter(mName))
 
-
+function prnt(message:string) {
+	console.log(message)
+}
 
 // Drawing 
-
 class DrawableShape {
 	x: number
 	y: number
@@ -27,6 +28,12 @@ class Rectangle {
 	selectionColor:string 
 	beingHovered:boolean
 	hoverColor:string 
+
+	minWidth:number
+	minHeight:number
+	scalingFactor:number
+
+
 	constructor(x:number, y:number, width:number, height:number, fill?:any) {
 		this.x = x || 0
 		this.y = y || 0
@@ -36,6 +43,10 @@ class Rectangle {
 		this.selectionColor = "#105151"
 		this.beingHovered = false
 		this.hoverColor = "#2EE6E6"
+		this.minWidth = 5
+		this.minHeight = 5
+		this.scalingFactor = 0.1
+
 	}
 
 	draw(context:any) {
@@ -53,6 +64,25 @@ class Rectangle {
 		} else {
 			return false
 		}
+	}
+
+	scale(delta:number) {
+		let midX:number = this.x + this.width/2
+		let midY:number = this.y + this.height/2
+		let newWidth:number = this.width + delta
+		let newHeight:number = this.height + delta
+
+		if (newWidth < this.minWidth) {
+			newWidth = this.minWidth
+		}
+		if (newHeight < this.minHeight) {
+			newHeight = this.minHeight	
+		}
+
+		this.x = midX - newWidth/2
+		this.y = midY - newHeight/2
+		this.width = newWidth
+		this.height = newHeight
 	}
 }
 
@@ -158,6 +188,14 @@ class CanvasState {						// Rename it to Canvas -> more OO
 			}
 		}, true)
 
+		this.canvas.addEventListener("wheel", function(e) {
+			// prnt("Scrolling baby " + e.deltaY)
+			if (mCanvas.selection) {
+				mCanvas.selection.scale(e.deltaY * mCanvas.selection.scalingFactor * -1)
+			}
+			mCanvas.valid = false
+		}, true)
+
 		this.canvas.addEventListener('mousemove', function(e) {
 			let mouse:any = mCanvas.getMouse(e)
 			if (mCanvas.dragging) {				
@@ -200,13 +238,15 @@ class CanvasState {						// Rename it to Canvas -> more OO
 		}, true)
 
 		this.canvas.addEventListener('dblclick', function(e) {
-			if (mCanvas.selection !== null) {
-				let mouse:any = mCanvas.getMouse(e)
-				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
-											   mouse.y - mCanvas.selection.height/2, 
-											   mCanvas.selection.width, 
-											   mCanvas.selection.height))
-			}			
+			let mouse:any = mCanvas.getMouse(e) 
+			for (let i = 0; i < mCanvas.nShapes; i++)	 {
+				if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
+					mCanvas.selection = null
+					mCanvas.deleteShape(mCanvas.shapes[i])
+					mCanvas.valid = false
+					return
+				}
+			}
 		}, true)
 	}
 
@@ -223,6 +263,14 @@ class CanvasState {						// Rename it to Canvas -> more OO
 		this.shapes.push(shape)
 		this.valid = false
 		this.nShapes++
+	}
+
+	deleteShape(shape:Rectangle) {
+		let index:number = this.shapes.indexOf(shape)
+		if (index > -1) {
+			this.shapes.splice(index, 1)
+		}
+		this.nShapes--
 	}
 
 	clear() {
