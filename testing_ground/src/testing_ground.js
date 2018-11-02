@@ -27,15 +27,39 @@ var Rectangle = /** @class */ (function () {
         this.minWidth = 5;
         this.minHeight = 5;
         this.scalingFactor = 0.1;
+        this.rotation = Math.PI / 4;
     }
     Rectangle.prototype.draw = function (context) {
+        // let tempX:number = this.x
+        // let tempY:number = this.y 
+        // console.log("x and y ", tempX, " ", tempY);
+        // this.x = -this.width/2
+        // this.y = -this.height/2
+        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
+        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
+        // context.setTransform(1, 0, 0, 1, -(this.x), -(this.y))
+        // context.setTransform(1, 0, 0, 1, 0, 0)
+        context.save();
+        context.translate(this.x + this.width / 2, this.y + this.height / 2);
+        context.rotate(this.rotation);
         if (this.beingHovered) {
             context.fillStyle = this.hoverColor;
         }
         else {
             context.fillStyle = this.fill;
         }
-        context.fillRect(this.x, this.y, this.width, this.height);
+        // context.fillRect(this.x, this.y, this.width, this.height)
+        context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        context.restore();
+        // context.rotate(-this.rotation)
+        // context.transform()
+        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
+        // context.setTransform(1, 0, 0, 1, -(this.x + this.width/2), -(this.y + this.height/2))
+        // context.setTransform(1, 0, 0, 1, 0, 0)
+        // context.setTransform(1, 0, 0, 1, (this.x), (this.y))
+        // context.setTransform(1, 0, 0, 1, 0, 0)
+        // this.x = tempX
+        // this.y = tempY
     };
     Rectangle.prototype.contains = function (x, y) {
         if ((this.x <= x) && (x <= this.x + this.width) && (this.y <= y) && (y <= this.y + this.height)) {
@@ -215,7 +239,12 @@ var CanvasState = /** @class */ (function () {
             if (this.selection != null) {
                 this.context.strokeStyle = this.selection.selectionColor;
                 this.context.lineWidth = this.selectionWidth;
-                this.context.strokeRect(this.selection.x, this.selection.y, this.selection.width, this.selection.height);
+                this.context.save();
+                this.context.translate(this.selection.x + this.selection.width / 2, this.selection.y + this.selection.height / 2);
+                this.context.rotate(this.selection.rotation);
+                this.context.strokeRect(-this.selection.width / 2, -this.selection.height / 2, this.selection.width, this.selection.height);
+                // context.fillRect(-this.selection.width/2, -this.selection.height/2, this.selection.width, this.selection.height)
+                this.context.restore();
             }
             this.valid = true;
         }
@@ -243,7 +272,7 @@ var CanvasState = /** @class */ (function () {
 var s = new CanvasState(document.getElementById('canvas'));
 s.init();
 // s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
-s.addShape(new Rectangle(40, 40, 50, 50));
+s.addShape(new Rectangle(375, 275, 50, 50));
 setInterval(function () { s.mState.draw(); }, s.timeInterval); // would love to know what this does
 // init()
 // wtf is jQuery
@@ -254,4 +283,12 @@ var context = canvas.getContext('2d');
 // context.fillStyle = 'green'
 // context.fillRect(100, 100, 200, 200);
 console.log(typeof (context.fillstyle));
+/* TODO
+Rotation
+Saving data
+Different shapes
+Buttons
+unit tests
+report
+*/
 console.log("Finished!");
