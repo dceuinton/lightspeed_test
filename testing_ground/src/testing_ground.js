@@ -1,3 +1,13 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 function greeter(person) {
     return 'hello ' + person + "!";
 }
@@ -5,6 +15,9 @@ var mName = 'Dale';
 console.log(greeter(mName));
 function prnt(message) {
     console.log(message);
+}
+function p() {
+    console.log("woohoo");
 }
 // Drawing 
 var DrawableShape = /** @class */ (function () {
@@ -18,18 +31,19 @@ var Rectangle = /** @class */ (function () {
     function Rectangle(x, y, width, height, fill) {
         this.x = x || 0;
         this.y = y || 0;
-        this.width = width || 0;
-        this.height = height || 0;
+        this.width = width || 40;
+        this.height = height || 30;
         this.fill = fill || "#32FAFA";
         this.selectionColor = "#105151";
         this.beingHovered = false;
-        // this.hoverColor = "#2EE6E6"
-        this.hoverColor = "#CC0000";
-        this.minWidth = 5;
-        this.minHeight = 5;
+        this.hoverColor = "#2EE6E6";
+        // this.hoverColor = "#CC0000"
+        this.scalingRatio = this.width / this.height;
+        this.minWidth = 40;
+        this.minHeight = this.minWidth * (this.height / this.width);
         this.scalingFactor = 0.1;
-        this.rotation = Math.PI / 4;
-        // this.rotation = 0
+        // this.rotation = Math.PI/4
+        this.rotation = 0;
     }
     Rectangle.prototype.draw = function (context) {
         context.translate(this.x + this.width / 2, this.y + this.height / 2);
@@ -43,22 +57,10 @@ var Rectangle = /** @class */ (function () {
         context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         context.setTransform(1, 0, 0, 1, 0, 0);
     };
-    Rectangle.prototype.getCurrentAngle = function (x, y) {
-        // if (x >= 0 && y >= 0) {
-        // 	return Math.atan(x/y)
-        // } else if (x >= 0 && y < 0) {
-        // 	return (Math.PI - Math.atan(x/y))
-        // } else if (x < 0 && y < 0) {
-        // 	return Math.PI + Math.atan(x/y)
-        // } else {
-        // 	return (2 * Math.PI) - Math.atan(x/y)
-        // }
-        return (Math.atan(y / x));
-    };
     Rectangle.prototype.contains = function (x, y) {
         var translatedX = x - (this.x + this.width / 2);
         var translatedY = y - (this.y + this.height / 2);
-        var currentAngle = this.getCurrentAngle(translatedX, translatedY);
+        var currentAngle = Math.atan(translatedY / translatedX);
         var radius = Math.sqrt(translatedX * translatedX + translatedY * translatedY);
         var translatedRotatedX = radius * Math.cos(currentAngle - this.rotation);
         var translatedRotatedY = radius * Math.sin(currentAngle - this.rotation);
@@ -71,19 +73,11 @@ var Rectangle = /** @class */ (function () {
         else {
             return false;
         }
-        // if ((this.x <= x) && 
-        // 	(x <= this.x + this.width) && 
-        // 	(this.y <= y) && 
-        // 	(y <= this.y + this.height)) {
-        // 	return true
-        // } else {
-        // 	return false
-        // }
     };
     Rectangle.prototype.scale = function (delta) {
         var midX = this.x + this.width / 2;
         var midY = this.y + this.height / 2;
-        var newWidth = this.width + delta;
+        var newWidth = this.width + this.scalingRatio * delta;
         var newHeight = this.height + delta;
         if (newWidth < this.minWidth) {
             newWidth = this.minWidth;
@@ -95,6 +89,9 @@ var Rectangle = /** @class */ (function () {
         this.y = midY - newHeight / 2;
         this.width = newWidth;
         this.height = newHeight;
+    };
+    Rectangle.prototype.rotate = function (delta) {
+        this.rotation += (delta % (2 * Math.PI));
     };
     return Rectangle;
 }());
@@ -221,6 +218,8 @@ var LSCanvas = /** @class */ (function () {
             shapes[0] = s;
         }
     };
+    LSCanvas.prototype.drawRotationButton = function (x, y) {
+    };
     LSCanvas.prototype.addShape = function (shape) {
         this.shapes.push(shape);
         this.valid = false;
@@ -282,19 +281,100 @@ var LSCanvas = /** @class */ (function () {
 }());
 var s = new LSCanvas(document.getElementById('canvas'));
 s.init();
-// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
 s.addShape(new Rectangle(375, 275, 100, 50));
+var LSCanvasButton = /** @class */ (function () {
+    function LSCanvasButton(btn, canvas) {
+        this.mBtn = btn;
+        this.mCanvas = canvas;
+        this.addMouseDownUpEventListeners();
+    }
+    LSCanvasButton.prototype.addMouseDownUpEventListeners = function () {
+        this.mBtn.addEventListener("mousedown", this.mouseDown, true);
+        this.mBtn.addEventListener("mouseup", this.mouseUp, true);
+    };
+    LSCanvasButton.prototype.mouseDown = function () {
+        if (s) {
+            console.log("Canvas is a thing");
+        }
+        console.log("Clicked button");
+    };
+    LSCanvasButton.prototype.mouseUp = function () {
+        console.log("Released click on button");
+    };
+    return LSCanvasButton;
+}());
+var LSCanvasRotationButton = /** @class */ (function (_super) {
+    __extends(LSCanvasRotationButton, _super);
+    function LSCanvasRotationButton(btn, canvas, clockwise) {
+        var _this = _super.call(this, btn, canvas) || this;
+        _this.mIntervalTime = 30;
+        _this.mClockwise = clockwise;
+        return _this;
+    }
+    LSCanvasRotationButton.prototype.addMouseDownUpEventListeners = function () {
+        this.mBtn.addEventListener("mousedown", this.mouseDown, true);
+        this.mBtn.addEventListener("mouseup", this.mouseUp, true);
+    };
+    LSCanvasRotationButton.prototype.mouseDown = function () {
+        if (s.selection) {
+            // this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
+            this.mIntervalID = setInterval(p, this.mIntervalTime);
+        }
+    };
+    LSCanvasRotationButton.prototype.mouseUp = function () {
+        clearInterval(this.mIntervalID);
+    };
+    LSCanvasRotationButton.prototype.rotateSelection = function () {
+        console.log("Calling");
+        s.selection.rotate(0.05);
+        s.valid = false;
+    };
+    return LSCanvasRotationButton;
+}(LSCanvasButton));
+// var btnRotateClockwise:LSCanvasButton = new LSCanvasButton(
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s.mState)
+// var btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s, true)
+function rotateSelectedClockwise() {
+    if (s.selection) {
+        s.selection.rotate(0.1);
+        s.valid = false;
+    }
+}
+var intervalClockwiseID = null;
+var btnRotateClockwise = document.getElementById("btnRotateClockwise");
+btnRotateClockwise.addEventListener("mousedown", function (e) {
+    intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true;
+});
+btnRotateClockwise.addEventListener("mouseup", function (e) {
+    clearInterval(intervalClockwiseID);
+}, true);
+function rotateSelectedAntiClockwise() {
+    if (s.selection) {
+        s.selection.rotate(-0.1);
+        s.valid = false;
+    }
+}
+var intervalAntiClockwiseID = null;
+var btnRotateAntiClockwise = document.getElementById("btnRotateAntiClockwise");
+btnRotateAntiClockwise.addEventListener("mousedown", function (e) {
+    intervalAntiClockwiseID = setInterval(rotateSelectedAntiClockwise, 30), true;
+});
+btnRotateAntiClockwise.addEventListener("mouseup", function (e) {
+    clearInterval(intervalAntiClockwiseID);
+}, true);
+// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
 setInterval(function () { s.mState.draw(); }, s.timeInterval);
-// init()
-// wtf is jQuery
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
-// context.fillStyle = 'blue'
-// context.fillRect(10, 10, 100, 100);
-// context.fillStyle = 'green'
-// context.fillRect(100, 100, 200, 200);
-console.log(typeof (context.fillstyle));
-console.log("Finished!");
+// // init()
+// // wtf is jQuery
+// var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('canvas') //HTMLCanvas
+// var context = canvas.getContext('2d')
+// // context.fillStyle = 'blue'
+// // context.fillRect(10, 10, 100, 100);
+// // context.fillStyle = 'green'
+// // context.fillRect(100, 100, 200, 200);
+// console.log(typeof(context.fillStyle))
+// console.log("Finished!")
 /* TODO
 
 - Create default sizes for shape and spawn with those - maybe overload constructor
@@ -308,6 +388,8 @@ Buttons
 unit tests
 report
 
+- remove all anys from the code
+
 
 
 - Rename class variables and local variables to better naming conventions
@@ -316,7 +398,7 @@ report
 QUESTIONS:
 
 - When I don't know the type do I just use any? e.g. var canvas: any = document.getElementById('canvas')
-
+- typescript in classes use let or var
 
 PROJECT REQUIREMENTS
 - Application architecture

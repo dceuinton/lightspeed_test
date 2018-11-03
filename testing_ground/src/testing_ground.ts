@@ -8,6 +8,10 @@ function prnt(message:string) {
 	console.log(message)
 }
 
+function p() {
+	console.log("woohoo")
+}
+
 // Drawing 
 class DrawableShape {
 	x: number
@@ -32,24 +36,26 @@ class Rectangle {
 	minWidth:number
 	minHeight:number
 	scalingFactor:number
+	scalingRatio:number
 
 	rotation:number
 
 	constructor(x:number, y:number, width:number, height:number, fill?:any) {
 		this.x = x || 0
 		this.y = y || 0
-		this.width = width || 0
-		this.height = height || 0
+		this.width = width || 40
+		this.height = height || 30
 		this.fill = fill || "#32FAFA"
 		this.selectionColor = "#105151"
 		this.beingHovered = false
 		this.hoverColor = "#2EE6E6"
 		// this.hoverColor = "#CC0000"
-		this.minWidth = 5
-		this.minHeight = 5
+		this.scalingRatio = this.width/this.height
+		this.minWidth = 40
+		this.minHeight = this.minWidth * (this.height/this.width)
 		this.scalingFactor = 0.1
-		this.rotation = Math.PI/4
-		// this.rotation = 0
+		// this.rotation = Math.PI/4
+		this.rotation = 0
 	}
 
 	draw(context:any) {
@@ -69,7 +75,6 @@ class Rectangle {
 		let translatedX:number = x - (this.x + this.width/2)
 		let translatedY:number = y - (this.y + this.height/2)
 		let currentAngle:number = Math.atan(translatedY/translatedX)
-
 		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
 		let translatedRotatedX:number = radius * Math.cos(currentAngle - this.rotation)
 		let translatedRotatedY:number = radius * Math.sin(currentAngle - this.rotation)
@@ -82,23 +87,12 @@ class Rectangle {
 		} else {
 			return false
 		}
-
-
-
-		// if ((this.x <= x) && 
-		// 	(x <= this.x + this.width) && 
-		// 	(this.y <= y) && 
-		// 	(y <= this.y + this.height)) {
-		// 	return true
-		// } else {
-		// 	return false
-		// }
 	}
 
 	scale(delta:number) {
 		let midX:number = this.x + this.width/2
 		let midY:number = this.y + this.height/2
-		let newWidth:number = this.width + delta
+		let newWidth:number = this.width + this.scalingRatio * delta
 		let newHeight:number = this.height + delta
 
 		if (newWidth < this.minWidth) {
@@ -112,6 +106,10 @@ class Rectangle {
 		this.y = midY - newHeight/2
 		this.width = newWidth
 		this.height = newHeight
+	}
+
+	rotate(delta:number) {
+		this.rotation += (delta % (2 * Math.PI))
 	}
 }
 
@@ -288,6 +286,10 @@ class LSCanvas {
 		}		
 	}
 
+	drawRotationButton(x:number, y:number) {
+
+	}
+
 	addShape(shape:Rectangle) {
 		this.shapes.push(shape)
 		this.valid = false
@@ -361,25 +363,126 @@ class LSCanvas {
 
 var s:LSCanvas = new LSCanvas(document.getElementById('canvas'))
 s.init();
-// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
 s.addShape(new Rectangle(375, 275, 100, 50))
+
+class LSCanvasButton {
+	mBtn:HTMLButtonElement
+	mCanvas:LSCanvas
+
+	constructor(btn:HTMLButtonElement, canvas:LSCanvas) {
+		this.mBtn = btn 
+		this.mCanvas = canvas
+		this.addMouseDownUpEventListeners()
+	}
+
+	addMouseDownUpEventListeners() {
+		this.mBtn.addEventListener("mousedown", this.mouseDown, true)
+		this.mBtn.addEventListener("mouseup", this.mouseUp, true)
+	}
+
+	mouseDown() {
+		if (s) {
+			console.log("Canvas is a thing")
+		}
+		console.log("Clicked button")
+
+	}
+
+	mouseUp() {
+		console.log("Released click on button")
+	}
+}
+
+class LSCanvasRotationButton extends LSCanvasButton {
+	mClockwise:boolean 
+	mIntervalTime:number = 30
+	mIntervalID:any											// any type here
+
+	constructor(btn:HTMLButtonElement, canvas:LSCanvas, clockwise:boolean) {
+		super(btn, canvas)
+		this.mClockwise = clockwise
+	}
+
+	addMouseDownUpEventListeners() {
+		this.mBtn.addEventListener("mousedown", this.mouseDown, true)
+		this.mBtn.addEventListener("mouseup", this.mouseUp, true)
+	}
+
+	mouseDown() {
+		if (s.selection) {
+			// this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
+			this.mIntervalID = setInterval(p, this.mIntervalTime)
+		}
+	}
+
+	mouseUp() {
+		clearInterval(this.mIntervalID)
+	}
+
+	rotateSelection() {
+		console.log("Calling")
+		s.selection.rotate(0.05)
+		s.valid = false
+	}
+}
+
+// var btnRotateClockwise:LSCanvasButton = new LSCanvasButton(
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s.mState)
+
+// var btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s, true)
+
+function rotateSelectedClockwise():void {
+	if (s.selection) {
+			s.selection.rotate(0.1)	
+			s.valid = false 
+		} 
+}
+var intervalClockwiseID:any = null
+var btnRotateClockwise:HTMLButtonElement = <HTMLButtonElement> document.getElementById("btnRotateClockwise")
+btnRotateClockwise.addEventListener("mousedown", function(e) {
+	intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true
+})
+btnRotateClockwise.addEventListener("mouseup", function(e) {
+	clearInterval(intervalClockwiseID)
+}, true)
+
+function rotateSelectedAntiClockwise():void {
+	if (s.selection) {
+			s.selection.rotate(-0.1)	
+			s.valid = false 
+		} 
+}
+var intervalAntiClockwiseID:any = null
+var btnRotateAntiClockwise:HTMLButtonElement = <HTMLButtonElement> document.getElementById("btnRotateAntiClockwise")
+btnRotateAntiClockwise.addEventListener("mousedown", function(e) {
+	intervalAntiClockwiseID = setInterval(rotateSelectedAntiClockwise, 30), true
+})
+btnRotateAntiClockwise.addEventListener("mouseup", function(e) {
+	clearInterval(intervalAntiClockwiseID)
+}, true)
+
+
+// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
 
 setInterval(function() {s.mState.draw();}, s.timeInterval)	
 
-// init()
-// wtf is jQuery
 
-var canvas: any = document.getElementById('canvas')
-var context = canvas.getContext('2d')
 
-// context.fillStyle = 'blue'
-// context.fillRect(10, 10, 100, 100);
-// context.fillStyle = 'green'
-// context.fillRect(100, 100, 200, 200);
+// // init()
+// // wtf is jQuery
 
-console.log(typeof(context.fillstyle))
+// var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById('canvas') //HTMLCanvas
+// var context = canvas.getContext('2d')
 
-console.log("Finished!")
+// // context.fillStyle = 'blue'
+// // context.fillRect(10, 10, 100, 100);
+// // context.fillStyle = 'green'
+// // context.fillRect(100, 100, 200, 200);
+
+// console.log(typeof(context.fillStyle))
+
+// console.log("Finished!")
 
 /* TODO
 
@@ -394,6 +497,8 @@ Buttons
 unit tests
 report
 
+- remove all anys from the code
+
 
 
 - Rename class variables and local variables to better naming conventions
@@ -404,7 +509,7 @@ report
 QUESTIONS:
 
 - When I don't know the type do I just use any? e.g. var canvas: any = document.getElementById('canvas')
-
+- typescript in classes use let or var
 
 PROJECT REQUIREMENTS
 - Application architecture
