@@ -44,26 +44,15 @@ class Rectangle {
 		this.selectionColor = "#105151"
 		this.beingHovered = false
 		this.hoverColor = "#2EE6E6"
+		// this.hoverColor = "#CC0000"
 		this.minWidth = 5
 		this.minHeight = 5
 		this.scalingFactor = 0.1
 		this.rotation = Math.PI/4
+		// this.rotation = 0
 	}
 
 	draw(context:any) {
-		// let tempX:number = this.x
-		// let tempY:number = this.y 
-
-		// console.log("x and y ", tempX, " ", tempY);
-
-		// this.x = -this.width/2
-		// this.y = -this.height/2
-		// context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-		// context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-		// context.setTransform(1, 0, 0, 1, -(this.x), -(this.y))
-		// context.setTransform(1, 0, 0, 1, 0, 0)
-
-		context.save()
 		context.translate(this.x + this.width/2, this.y + this.height/2)
 
 		context.rotate(this.rotation)
@@ -72,28 +61,38 @@ class Rectangle {
 		} else {
 			context.fillStyle = this.fill	
 		}		
-		// context.fillRect(this.x, this.y, this.width, this.height)
 		context.fillRect(-this.width/2, -this.height/2, this.width, this.height)
-		context.restore()
-
-
-		// context.rotate(-this.rotation)
-		// context.transform()
-		// context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-		// context.setTransform(1, 0, 0, 1, -(this.x + this.width/2), -(this.y + this.height/2))
-		// context.setTransform(1, 0, 0, 1, 0, 0)
-		// context.setTransform(1, 0, 0, 1, (this.x), (this.y))
-		// context.setTransform(1, 0, 0, 1, 0, 0)
-		// this.x = tempX
-		// this.y = tempY
+		context.setTransform(1, 0, 0, 1, 0, 0)
 	} 
 
 	contains(x:number, y:number) {
-		if ((this.x <= x) && (x <= this.x + this.width) && (this.y <= y) && (y <= this.y + this.height)) {
-			return true
+		let translatedX:number = x - (this.x + this.width/2)
+		let translatedY:number = y - (this.y + this.height/2)
+		let currentAngle:number = Math.atan(translatedY/translatedX)
+
+		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
+		let translatedRotatedX:number = radius * Math.cos(currentAngle - this.rotation)
+		let translatedRotatedY:number = radius * Math.sin(currentAngle - this.rotation)
+
+		if ((translatedRotatedX <= this.width/2) && 
+			(-this.width/2 <= translatedRotatedX) &&
+			(translatedRotatedY <= this.height/2) && 
+			(-this.height/2 <= translatedRotatedY)) {
+			return true 
 		} else {
 			return false
 		}
+
+
+
+		// if ((this.x <= x) && 
+		// 	(x <= this.x + this.width) && 
+		// 	(this.y <= y) && 
+		// 	(y <= this.y + this.height)) {
+		// 	return true
+		// } else {
+		// 	return false
+		// }
 	}
 
 	scale(delta:number) {
@@ -118,7 +117,7 @@ class Rectangle {
 
 
 // Remember to attribute simonsarris
-class CanvasState {						// Rename it to Canvas -> more OO
+class LSCanvas {			
 	canvas:any
 	width:number
 	height:number
@@ -141,7 +140,7 @@ class CanvasState {						// Rename it to Canvas -> more OO
 	dragging:boolean
 	dragOffsetX:number
 	dragOffsetY:number
-	mState:CanvasState
+	mState:LSCanvas
 
 	selectionWidth:number
 	timeInterval:number
@@ -178,10 +177,10 @@ class CanvasState {						// Rename it to Canvas -> more OO
 	}
 
 	init() { 
-		let mCanvas:CanvasState = this.mState
+		let mCanvas:LSCanvas = this.mState
 		this.canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
 		
-		this.canvas.addEventListener("mousedown", function(e, Canvas:CanvasState) {
+		this.canvas.addEventListener("mousedown", function(e, Canvas:LSCanvas) {
 			console.log("MouseDown")
 			let mouse:any = mCanvas.getMouse(e)
 			let mouseX:number = mouse.x
@@ -360,17 +359,17 @@ class CanvasState {						// Rename it to Canvas -> more OO
 	}
 }
 
-var s:CanvasState = new CanvasState(document.getElementById('canvas'))
+var s:LSCanvas = new LSCanvas(document.getElementById('canvas'))
 s.init();
 // s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
-s.addShape(new Rectangle(375, 275, 50, 50))
+s.addShape(new Rectangle(375, 275, 100, 50))
 
-setInterval(function() {s.mState.draw();}, s.timeInterval)								// would love to know what this does
+setInterval(function() {s.mState.draw();}, s.timeInterval)	
 
 // init()
 // wtf is jQuery
 
-var canvas: any = document.getElementById('canvas')           // When I don't know the type do I just use any?
+var canvas: any = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
 // context.fillStyle = 'blue'
@@ -380,13 +379,40 @@ var context = canvas.getContext('2d')
 
 console.log(typeof(context.fillstyle))
 
+console.log("Finished!")
+
 /* TODO
+
+- Create default sizes for shape and spawn with those - maybe overload constructor
+
 Rotation
+	- Callback function for draw to make things way nicer
+	- Draw from center always?
 Saving data
 Different shapes
 Buttons
 unit tests
 report
+
+
+
+- Rename class variables and local variables to better naming conventions
 */
 
-console.log("Finished!")
+
+/*
+QUESTIONS:
+
+- When I don't know the type do I just use any? e.g. var canvas: any = document.getElementById('canvas')
+
+
+PROJECT REQUIREMENTS
+- Application architecture
+- key design decisions
+- Unit testing. What do you want me to test.
+- How good do you want it to look?
+- General how does the npm structure look
+- what development environment do you use
+
+
+*/

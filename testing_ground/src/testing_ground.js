@@ -23,23 +23,15 @@ var Rectangle = /** @class */ (function () {
         this.fill = fill || "#32FAFA";
         this.selectionColor = "#105151";
         this.beingHovered = false;
-        this.hoverColor = "#2EE6E6";
+        // this.hoverColor = "#2EE6E6"
+        this.hoverColor = "#CC0000";
         this.minWidth = 5;
         this.minHeight = 5;
         this.scalingFactor = 0.1;
         this.rotation = Math.PI / 4;
+        // this.rotation = 0
     }
     Rectangle.prototype.draw = function (context) {
-        // let tempX:number = this.x
-        // let tempY:number = this.y 
-        // console.log("x and y ", tempX, " ", tempY);
-        // this.x = -this.width/2
-        // this.y = -this.height/2
-        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-        // context.setTransform(1, 0, 0, 1, -(this.x), -(this.y))
-        // context.setTransform(1, 0, 0, 1, 0, 0)
-        context.save();
         context.translate(this.x + this.width / 2, this.y + this.height / 2);
         context.rotate(this.rotation);
         if (this.beingHovered) {
@@ -48,26 +40,45 @@ var Rectangle = /** @class */ (function () {
         else {
             context.fillStyle = this.fill;
         }
-        // context.fillRect(this.x, this.y, this.width, this.height)
         context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
-        context.restore();
-        // context.rotate(-this.rotation)
-        // context.transform()
-        // context.setTransform(1, 0, 0, 1, (this.x + this.width/2), (this.y + this.height/2))
-        // context.setTransform(1, 0, 0, 1, -(this.x + this.width/2), -(this.y + this.height/2))
-        // context.setTransform(1, 0, 0, 1, 0, 0)
-        // context.setTransform(1, 0, 0, 1, (this.x), (this.y))
-        // context.setTransform(1, 0, 0, 1, 0, 0)
-        // this.x = tempX
-        // this.y = tempY
+        context.setTransform(1, 0, 0, 1, 0, 0);
+    };
+    Rectangle.prototype.getCurrentAngle = function (x, y) {
+        // if (x >= 0 && y >= 0) {
+        // 	return Math.atan(x/y)
+        // } else if (x >= 0 && y < 0) {
+        // 	return (Math.PI - Math.atan(x/y))
+        // } else if (x < 0 && y < 0) {
+        // 	return Math.PI + Math.atan(x/y)
+        // } else {
+        // 	return (2 * Math.PI) - Math.atan(x/y)
+        // }
+        return (Math.atan(y / x));
     };
     Rectangle.prototype.contains = function (x, y) {
-        if ((this.x <= x) && (x <= this.x + this.width) && (this.y <= y) && (y <= this.y + this.height)) {
+        var translatedX = x - (this.x + this.width / 2);
+        var translatedY = y - (this.y + this.height / 2);
+        var currentAngle = this.getCurrentAngle(translatedX, translatedY);
+        var radius = Math.sqrt(translatedX * translatedX + translatedY * translatedY);
+        var translatedRotatedX = radius * Math.cos(currentAngle - this.rotation);
+        var translatedRotatedY = radius * Math.sin(currentAngle - this.rotation);
+        if ((translatedRotatedX <= this.width / 2) &&
+            (-this.width / 2 <= translatedRotatedX) &&
+            (translatedRotatedY <= this.height / 2) &&
+            (-this.height / 2 <= translatedRotatedY)) {
             return true;
         }
         else {
             return false;
         }
+        // if ((this.x <= x) && 
+        // 	(x <= this.x + this.width) && 
+        // 	(this.y <= y) && 
+        // 	(y <= this.y + this.height)) {
+        // 	return true
+        // } else {
+        // 	return false
+        // }
     };
     Rectangle.prototype.scale = function (delta) {
         var midX = this.x + this.width / 2;
@@ -88,8 +99,8 @@ var Rectangle = /** @class */ (function () {
     return Rectangle;
 }());
 // Remember to attribute simonsarris
-var CanvasState = /** @class */ (function () {
-    function CanvasState(canvas) {
+var LSCanvas = /** @class */ (function () {
+    function LSCanvas(canvas) {
         this.canvas = canvas;
         this.context = canvas.getContext('2d');
         this.width = canvas.width;
@@ -114,7 +125,7 @@ var CanvasState = /** @class */ (function () {
         this.selectionWidth = 2;
         this.timeInterval = 30;
     }
-    CanvasState.prototype.init = function () {
+    LSCanvas.prototype.init = function () {
         var mCanvas = this.mState;
         this.canvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; });
         this.canvas.addEventListener("mousedown", function (e, Canvas) {
@@ -202,7 +213,7 @@ var CanvasState = /** @class */ (function () {
             }
         }, true);
     };
-    CanvasState.prototype.moveToFrontOfShapes = function (shapes, s, index) {
+    LSCanvas.prototype.moveToFrontOfShapes = function (shapes, s, index) {
         if (index > 0) {
             for (var i = index; i > 0; i--) {
                 shapes[i] = shapes[i - 1];
@@ -210,22 +221,22 @@ var CanvasState = /** @class */ (function () {
             shapes[0] = s;
         }
     };
-    CanvasState.prototype.addShape = function (shape) {
+    LSCanvas.prototype.addShape = function (shape) {
         this.shapes.push(shape);
         this.valid = false;
         this.nShapes++;
     };
-    CanvasState.prototype.deleteShape = function (shape) {
+    LSCanvas.prototype.deleteShape = function (shape) {
         var index = this.shapes.indexOf(shape);
         if (index > -1) {
             this.shapes.splice(index, 1);
         }
         this.nShapes--;
     };
-    CanvasState.prototype.clear = function () {
+    LSCanvas.prototype.clear = function () {
         this.context.clearRect(0, 0, this.width, this.height);
     };
-    CanvasState.prototype.draw = function () {
+    LSCanvas.prototype.draw = function () {
         if (!this.valid) {
             this.clear();
             var nShapes = this.shapes.length;
@@ -249,7 +260,7 @@ var CanvasState = /** @class */ (function () {
             this.valid = true;
         }
     };
-    CanvasState.prototype.getMouse = function (e) {
+    LSCanvas.prototype.getMouse = function (e) {
         var element = this.canvas;
         var offsetX = 0;
         var offsetY = 0;
@@ -267,28 +278,53 @@ var CanvasState = /** @class */ (function () {
         mouseY = e.pageY - offsetY;
         return { x: mouseX, y: mouseY };
     };
-    return CanvasState;
+    return LSCanvas;
 }());
-var s = new CanvasState(document.getElementById('canvas'));
+var s = new LSCanvas(document.getElementById('canvas'));
 s.init();
 // s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
-s.addShape(new Rectangle(375, 275, 50, 50));
-setInterval(function () { s.mState.draw(); }, s.timeInterval); // would love to know what this does
+s.addShape(new Rectangle(375, 275, 100, 50));
+setInterval(function () { s.mState.draw(); }, s.timeInterval);
 // init()
 // wtf is jQuery
-var canvas = document.getElementById('canvas'); // When I don't know the type do I just use any?
+var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
 // context.fillStyle = 'blue'
 // context.fillRect(10, 10, 100, 100);
 // context.fillStyle = 'green'
 // context.fillRect(100, 100, 200, 200);
 console.log(typeof (context.fillstyle));
+console.log("Finished!");
 /* TODO
+
+- Create default sizes for shape and spawn with those - maybe overload constructor
+
 Rotation
+    - Callback function for draw to make things way nicer
+    - Draw from center always?
 Saving data
 Different shapes
 Buttons
 unit tests
 report
+
+
+
+- Rename class variables and local variables to better naming conventions
 */
-console.log("Finished!");
+/*
+QUESTIONS:
+
+- When I don't know the type do I just use any? e.g. var canvas: any = document.getElementById('canvas')
+
+
+PROJECT REQUIREMENTS
+- Application architecture
+- key design decisions
+- Unit testing. What do you want me to test.
+- How good do you want it to look?
+- General how does the npm structure look
+- what development environment do you use
+
+
+*/ 
