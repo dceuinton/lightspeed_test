@@ -1,5 +1,10 @@
 import {Rectangle} from "./Shapes"
 
+/*
+Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
+This particularly influenced the getMouse and draw methods however I have made changes to these as well
+*/
+
 const CSS_STYLE_PADDING_LEFT:number = 102
 const CSS_STYLE_PADDING_TOP:number = 104
 const CSS_STYLE_BORDER_LEFT:number = 30
@@ -8,7 +13,7 @@ const CSS_STYLE_BORDER_TOP:number = 38
 const SHAPE_DATA_KEY:string = "shapedata"
 
 class LSCanvas {			
-	canvas:any
+	canvas:HTMLCanvasElement
 	width:number
 	height:number
 	context:CanvasRenderingContext2D
@@ -18,7 +23,7 @@ class LSCanvas {
 	styleBorderLeft:number
 	styleBorderTop:number
 
-	html:any
+	html:any					// figure out what to class this as
 	htmlTop:number
 	htmlLeft:number
 
@@ -40,9 +45,9 @@ class LSCanvas {
 	selectionWidth:number
 	timeInterval:number
 
-	constructor(canvas:any) {
+	constructor(canvas:HTMLCanvasElement) {
 		this.canvas = canvas;
-		this.context = canvas.getContext('2d')
+		this.context = <CanvasRenderingContext2D> canvas.getContext('2d')
 		this.width = canvas.width							
 		this.height = canvas.height
 
@@ -52,10 +57,16 @@ class LSCanvas {
 		this.styleBorderTop = 0
 
 		if (document.defaultView && document.defaultView.getComputedStyle) {
-			this.stylePaddingLeft = parseInt(<string>document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_PADDING_LEFT], 10)
-			this.stylePaddingTop = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_PADDING_TOP], 10)
-			this.styleBorderLeft = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_BORDER_LEFT], 10)
-			this.styleBorderTop = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_BORDER_TOP], 10)
+			this.stylePaddingLeft = parseInt(<string>document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_PADDING_LEFT], 10) || 0
+			this.stylePaddingTop = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_PADDING_TOP], 10) || 0
+			this.styleBorderLeft = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_BORDER_LEFT], 10) || 0
+			this.styleBorderTop = parseInt(<string> document.defaultView.getComputedStyle(canvas, null)[CSS_STYLE_BORDER_TOP], 10) || 0
+
+			// console.log()
+			// console.log(this.stylePaddingLeft)
+			// console.log(this.stylePaddingTop)
+			// console.log(this.styleBorderLeft)
+			// console.log(this.styleBorderTop)
 		}
 
 		this.html = document.body.parentNode
@@ -123,11 +134,12 @@ class LSCanvas {
 		
 		this.canvas.addEventListener("mousedown", function(e:MouseEvent) {
 			// console.log("MouseDown")
-			let mouse:any = mCanvas.getMouse(e)
+			let mouse:MouseLocation = mCanvas.getMouse(e)
+			// console.log(mouse)
 			let mouseX:number = mouse.x
 			let mouseY:number = mouse.y
 
-			console.log(mouseX)
+			// console.log(mouseX)
 			// let shapes:Rectangle[] = mCanvas.shapes
 			// let nShapes:number = shapes.length
 
@@ -170,7 +182,7 @@ class LSCanvas {
 		}, true)
 
 		this.canvas.addEventListener('mousemove', function(e:MouseEvent) {
-			let mouse:any = mCanvas.getMouse(e)
+			let mouse:MouseLocation = mCanvas.getMouse(e)
 			if (mCanvas.dragging && mCanvas.liveSelection()) {				
 				mCanvas.selection.x = mouse.x - mCanvas.dragOffsetX
 				mCanvas.selection.y = mouse.y - mCanvas.dragOffsetY
@@ -201,7 +213,7 @@ class LSCanvas {
 			e.preventDefault();
 			// console.log("Right Click")
 			if (mCanvas.liveSelection()) {
-				let mouse:any = mCanvas.getMouse(e)
+				let mouse:MouseLocation = mCanvas.getMouse(e)
 				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
 											   mouse.y - mCanvas.selection.height/2, 
 											   mCanvas.selection.width, 
@@ -211,7 +223,7 @@ class LSCanvas {
 		}, true)
 
 		this.canvas.addEventListener('dblclick', function(e:MouseEvent) {
-			let mouse:any = mCanvas.getMouse(e) 
+			let mouse:MouseLocation = mCanvas.getMouse(e) 
 			for (let i = 0; i < mCanvas.nShapes; i++)	 {
 				if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
 					// mCanvas.selection = null
@@ -284,25 +296,36 @@ class LSCanvas {
 		window.sessionStorage.setItem(this.SHAPE_KEY, JSON.stringify(this.shapes))
 	}
 
-	getMouse(e:MouseEvent):MouseLocation {							// need to put a type on this
-		var element:any = this.canvas
-		var offsetX:number = 0
-		var offsetY:number = 0
-		var mouseX:number = 0
-		var mouseY:number = 0
+	getMouse(e:MouseEvent):MouseLocation {							// method borrowed from simon sarris 
+		let element:any = this.canvas
+		let offsetX:number = 0
+		let offsetY:number = 0
+		let mouseX:number = 0
+		let mouseY:number = 0
+		// let carryOn:boolean = true
+
+		// console.log(element.offsetParent)
 
 		if (element.offsetParent !== undefined) {
 			do {
 				offsetX += element.offsetLeft
 				offsetY += element.offsetTop
+				// console.log(offsetX)
 			} while (element = element.offsetParent)
 		}
 
 		offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft
 		offsetY += this.stylePaddingTop + this.styleBorderTop + this.htmlTop
 
+		// console.log(this.stylePaddingLeft)
+		// console.log(this.styleBorderLeft)
+		// console.log(this.htmlLeft)
+
 		mouseX = e.pageX - offsetX
 		mouseY = e.pageY - offsetY
+
+		// console.log(e.pageX)
+		// console.log(mouseX)
 
 
 
