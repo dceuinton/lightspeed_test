@@ -64,7 +64,7 @@ class LSCanvasRotationButton extends LSCanvasButton {
 	// }
 
 	mouseDown = () => {
-		console.log(this.mCanvas)
+		// console.log(this.mCanvas)
 		if (this.mCanvas.selection) {
 			this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
 			// this.mIntervalID = setInterval(p, this.mIntervalTime)
@@ -76,7 +76,7 @@ class LSCanvasRotationButton extends LSCanvasButton {
 	}
 
 	rotateSelection = () => {
-		console.log("Calling")
+		// console.log("Calling")
 		if (this.mClockwise) {
 			this.mCanvas.selection.rotate(0.05)	
 		} else {
@@ -94,7 +94,7 @@ class LSCanvasRectangleButton extends LSCanvasButton {
 	}
 
 	mouseDown = () => {
-		this.mCanvas.addShape(new Rectangle(0, 0, 50, 50))
+		this.mCanvas.addShape(new Rectangle(0, 0, 50, 50, 0))
 	}
 
 	mouseUp = () => {}

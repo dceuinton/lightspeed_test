@@ -1,3 +1,4 @@
+import {Shape} from "./Shapes"
 import {Rectangle} from "./Shapes"
 
 /*
@@ -96,7 +97,7 @@ class LSCanvas {
 		this.nShapes = this.shapes.length
 		this.dragging = false
 		this.selected = false
-		this.selection = new Rectangle(0, 0, 0, 0)
+		this.selection = new Rectangle(0, 0, 0, 0, 0)
 		this.dragOffsetX = 0
 		this.dragOffsetY = 0
 
@@ -217,7 +218,8 @@ class LSCanvas {
 				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
 											   mouse.y - mCanvas.selection.height/2, 
 											   mCanvas.selection.width, 
-											   mCanvas.selection.height))
+											   mCanvas.selection.height, 
+											   0))
 			}		
 			return false
 		}, true)
