@@ -3,33 +3,53 @@ class Shape {
 	y:number
 	rotation:number 
 
+	width:number
+	height:number
+	radius:number
+	points:number
+
 	color:string 
 	selectionColor:string 
 	hoverColor:string 
+	strokeWidth:number
 
 	beingHovered:boolean 
 
+	scalingFactor:number
+
 	_type:string
 
-	constructor(x:number, y:number, rotation:number) {
+	constructor(x:number, y:number, rotation?:number) {
 		this.x = x 
 		this.y = y 
-		this.rotation = rotation 
+		this.rotation = rotation || 0
 
 		this.color          = "#000000"
 		this.selectionColor = "#000000"
 		this.hoverColor     = "#000000"
+		this.strokeWidth = 3
 
 		this.beingHovered = false 
 
+		this.scalingFactor = 0.1
+
 		this._type = "SHAPE"
+
+		this.width = 0
+		this.height = 0
+		this.radius = 0
+		this.points = 0
 	}
 
 	draw(context:CanvasRenderingContext2D):void {
 		console.log(context)
 	}
 
-	contains(x:number, y:number):boolean {
+	drawOutline(context:CanvasRenderingContext2D):void {
+		console.log(context)
+	}
+
+	contains(x:number, y:number, context?:CanvasRenderingContext2D):boolean {
 		if (this.x == x && this.y == y) {
 			return true
 		} 
@@ -51,9 +71,7 @@ class Rectangle extends Shape {
 	height:number
 	minWidth:number
 	minHeight:number
-	scalingFactor:number
 	scalingRatio:number	
-	// _type:string
 
 	constructor(x:number, y:number, width:number, height:number, rotation:number) {
 		
@@ -61,12 +79,11 @@ class Rectangle extends Shape {
 		this.width = width
 		this.height = height 
 		
-		this.color = "#32FAFA"
-		this.selectionColor = "#105151"
-		this.hoverColor = "#2EE6E6"
+		this.color = "#00CCFF"
+		this.selectionColor = "#006680"
+		this.hoverColor = "#00A3CC"
 
 		this.scalingRatio = this.height/this.width
-		this.scalingFactor = 0.1
 		this.minWidth = 40
 		this.minHeight = this.scalingRatio * this.minWidth
 
@@ -101,6 +118,16 @@ class Rectangle extends Shape {
 		context.fillRect(-this.width/2, -this.height/2, this.width, this.height)
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	} 
+
+	drawOutline(context:CanvasRenderingContext2D) {
+		context.translate(this.x + this.width/2, this.y + this.height/2)
+
+		context.rotate(this.rotation)
+		context.strokeStyle = this.selectionColor	
+		context.lineWidth = this.strokeWidth
+		context.strokeRect(-this.width/2, -this.height/2, this.width, this.height)
+		context.setTransform(1, 0, 0, 1, 0, 0)
+	}
 
 	contains(x:number, y:number):boolean {
 		let translatedX:number = x - (this.x + this.width/2)
@@ -140,8 +167,69 @@ class Rectangle extends Shape {
 	}
 }
 
-// class Circle
+class Circle extends Shape {
 
-export {Rectangle}
+	minRadius:number
+
+	constructor(x:number, y:number, radius:number) {
+		super(x, y)
+		this.radius = radius
+
+		this.minRadius = 40
+
+		this.color = "#FF0066"
+		this.selectionColor = "#800033"
+		this.hoverColor = "#CC0052"
+
+		this._type = "CIRCLE"
+	}
+
+	draw(context:CanvasRenderingContext2D):void {
+		if (this.beingHovered) {
+			context.fillStyle = this.hoverColor	
+			context.strokeStyle = this.hoverColor	
+		} else {
+			context.fillStyle = this.color	
+			context.strokeStyle = this.color	
+		}		
+
+		context.beginPath()
+		context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+		context.stroke()
+		context.fill()
+	}
+
+	drawOutline(context:CanvasRenderingContext2D) {
+		context.strokeStyle = this.selectionColor
+		context.lineWidth = this.strokeWidth
+
+		context.beginPath()
+		context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+		context.stroke()
+	}
+
+	contains(x:number, y:number):boolean {
+		let translatedX:number = x - this.x 
+		let translatedY:number = y - this.y
+
+		if (translatedX*translatedX + translatedY*translatedY < this.radius * this. radius) {
+			return true 
+		} else {
+			return false 
+		}
+	}
+
+	scale(delta:number):void {
+		this.radius += delta;
+		if (this.radius < this.minRadius) {
+			this.radius = this.minRadius
+		}
+	}
+
+}
+
+
 export{Shape}
+export {Rectangle}
+export {Circle}
 

@@ -1,5 +1,6 @@
 import {Shape} from "./Shapes"
 import {Rectangle} from "./Shapes"
+import {Circle} from "./Shapes"
 
 /*
 Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
@@ -28,11 +29,11 @@ class LSCanvas {
 	htmlTop:number
 	htmlLeft:number
 
-	shapes:Rectangle[]
+	shapes:Shape[]
 	nShapes:number
 
 	selected:boolean
-	selection:Rectangle
+	selection:Shape
 
 	valid:boolean
 	dragging:boolean
@@ -107,22 +108,42 @@ class LSCanvas {
 		this.timeInterval = 30
 	}
 
-	getShapesFromStorage() : Rectangle[] {
+	getShapesFromStorage() : Shape[] {
 
-		let shapes:Rectangle[] = []
+		let shapes:Shape[] = []
 		if (window.sessionStorage.getItem(SHAPE_DATA_KEY)) {
 			let jsonString:string = window.sessionStorage.getItem(SHAPE_DATA_KEY) || ""
-			let jsonArray:Array<Rectangle> = JSON.parse(jsonString)
+			let jsonArray:Array<Shape> = JSON.parse(jsonString)
 			
 			// console.log(jsonArray)		
 
 			for (let i = 0; i < jsonArray.length; i++) {
 				let x:number = jsonArray[i]["x"]
 				let y:number = jsonArray[i]["y"]
-				let width:number = jsonArray[i]["width"]
-				let height:number = jsonArray[i]["height"]
 				let rotation:number = jsonArray[i]["rotation"]
-				shapes.push(new Rectangle(x, y, width, height, rotation))
+
+				switch(jsonArray[i]._type) {
+					case "RECTANGLE":
+					let width:number = jsonArray[i]["width"]
+					let height:number = jsonArray[i]["height"]
+					shapes.push(new Rectangle(x, y, width, height, rotation))
+					break;
+					case "CIRCLE":
+					let radius:number = jsonArray[i]["radius"]
+					shapes.push(new Circle(x, y, radius))
+					break;
+					case "STAR":
+					// let radius:number = jsonArray[i]["radius"]
+					// let points:number = jsonArray[i]["points"]
+					break;
+					case "TRIANGLE":
+					// let radius:number = jsonArray[i]["radius"]
+					// let points:number = jsonArray[i]["points"]
+					break;
+					default:
+					console.log("Type of shape has not been set")
+					break;
+				}
 			}	
 		}		
 
@@ -131,6 +152,7 @@ class LSCanvas {
 
 	init() { 
 		let mCanvas:LSCanvas = this.mState
+		let mContext:CanvasRenderingContext2D = this.context
 		this.canvas.addEventListener('selectstart', function(e:Event) {e.preventDefault(); return false})
 		
 		this.canvas.addEventListener("mousedown", function(e:MouseEvent) {
@@ -146,7 +168,7 @@ class LSCanvas {
 
 			// for (var i = mCanvas.nShapes - 1; i >= 0; i--) { 
 			for (var i = 0; i < mCanvas.nShapes; i++) { 
-				if (mCanvas.shapes[i].contains(mouseX, mouseY)) {
+				if (mCanvas.shapes[i].contains(mouseX, mouseY, mContext)) {
 					mCanvas.dragOffsetX = mouseX - mCanvas.shapes[i].x
 					mCanvas.dragOffsetY = mouseY - mCanvas.shapes[i].y
 					mCanvas.shapes[i].beingHovered = false
@@ -197,7 +219,7 @@ class LSCanvas {
 						mCanvas.shapes[i].beingHovered = false	
 						mCanvas.valid = false
 					}					
-					if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
+					if (mCanvas.shapes[i].contains(mouse.x, mouse.y, mContext)) {
 						mCanvas.shapes[i].beingHovered = true
 						mCanvas.valid = false
 						// console.log("hovered")
@@ -215,11 +237,31 @@ class LSCanvas {
 			// console.log("Right Click")
 			if (mCanvas.liveSelection()) {
 				let mouse:MouseLocation = mCanvas.getMouse(e)
-				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
+
+				switch(mCanvas.selection._type) {
+					case "RECTANGLE":
+					mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
 											   mouse.y - mCanvas.selection.height/2, 
 											   mCanvas.selection.width, 
 											   mCanvas.selection.height, 
 											   0))
+					break;
+					case "CIRCLE":
+					mCanvas.addShape(new Circle(mouse.x, mouse.y, mCanvas.selection.radius))
+
+
+					break;
+					case "STAR":
+					
+					break;
+					case "TRIANGLE":
+					
+					break;
+					default:
+					console.log("Type of shape has not been set")
+					break;
+				}
+				
 			}		
 			return false
 		}, true)
@@ -227,7 +269,7 @@ class LSCanvas {
 		this.canvas.addEventListener('dblclick', function(e:MouseEvent) {
 			let mouse:MouseLocation = mCanvas.getMouse(e) 
 			for (let i = 0; i < mCanvas.nShapes; i++)	 {
-				if (mCanvas.shapes[i].contains(mouse.x, mouse.y)) {
+				if (mCanvas.shapes[i].contains(mouse.x, mouse.y, mContext)) {
 					// mCanvas.selection = null
 					mCanvas.deselect()
 					mCanvas.deleteShape(mCanvas.shapes[i])
@@ -238,7 +280,7 @@ class LSCanvas {
 		}, true)
 	}
 
-	moveToFrontOfShapes(shapes:Rectangle[], s:Rectangle, index:number) {
+	moveToFrontOfShapes(shapes:Shape[], s:Shape, index:number) {
 		if (index > 0) {
 			for (var i = index; i > 0; i--) {
 				shapes[i] = shapes[i - 1]
@@ -247,13 +289,13 @@ class LSCanvas {
 		}		
 	}
 
-	addShape(shape:Rectangle) {
+	addShape(shape:Shape) {
 		this.shapes.push(shape)
 		this.valid = false
 		this.nShapes++
 	}
 
-	deleteShape(shape:Rectangle) {
+	deleteShape(shape:Shape) {
 		let index:number = this.shapes.indexOf(shape)
 		if (index > -1) {
 			this.shapes.splice(index, 1)
@@ -281,15 +323,7 @@ class LSCanvas {
 			}
 
 			if (this.liveSelection()) {
-				this.context.strokeStyle = this.selection.selectionColor
-				this.context.lineWidth = this.selectionWidth
-
-				this.context.save()
-				this.context.translate(this.selection.x + this.selection.width/2, this.selection.y + this.selection.height/2)
-				this.context.rotate(this.selection.rotation)
-				this.context.strokeRect(-this.selection.width/2, -this.selection.height/2, this.selection.width, this.selection.height)
-				// context.fillRect(-this.selection.width/2, -this.selection.height/2, this.selection.width, this.selection.height)
-				this.context.restore()
+				this.selection.drawOutline(this.context)
 			}
 
 			this.valid = true
@@ -334,7 +368,7 @@ class LSCanvas {
 		return new MouseLocation(mouseX, mouseY)// {x:mouseX, y:mouseY}				// put this into a custom object?
 	}
 
-	select(shape:Rectangle):void {
+	select(shape:Shape):void {
 		this.selection = shape
 		this.selected = true
 	}

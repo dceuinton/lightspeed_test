@@ -1,5 +1,6 @@
 import {LSCanvas} from "./LSCanvas"
 import {Rectangle} from "./Shapes"
+import {Circle} from "./Shapes"
 
 class LSCanvasButton {
 	mBtn:HTMLButtonElement
@@ -101,6 +102,21 @@ class LSCanvasRectangleButton extends LSCanvasButton {
 
 }
 
+class LSCanvasCircleButton extends LSCanvasButton {
+
+	constructor(btn:HTMLButtonElement, canvas:LSCanvas) {
+		super(btn, canvas)
+	}
+
+	mouseDown = () => {
+		this.mCanvas.addShape(new Circle(100, 100, 50))
+	}
+
+	mouseUp = () => {}
+
+}
+
 export {LSCanvasButton}
 export {LSCanvasRotationButton}
 export {LSCanvasRectangleButton}
+export {LSCanvasCircleButton}

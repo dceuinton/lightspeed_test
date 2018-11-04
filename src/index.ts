@@ -3,6 +3,7 @@ import {LSCanvas} from "./LSCanvas"
 // import {LSCanvasButton} from "./Buttons"
 import {LSCanvasRotationButton} from "./Buttons"
 import {LSCanvasRectangleButton} from "./Buttons"
+import {LSCanvasCircleButton} from "./Buttons"
 
 let lsCanvas:LSCanvas = new LSCanvas(<HTMLCanvasElement>document.getElementById("canvas"))
 lsCanvas.init()
@@ -20,6 +21,10 @@ btnRotateAntiClockwise.init()
 let btnCreateSquare:LSCanvasRectangleButton = new LSCanvasRectangleButton(
 	<HTMLButtonElement>document.getElementById("btnCreateSquare"), lsCanvas)
 btnCreateSquare.init()
+
+let btnCreateCircle:LSCanvasCircleButton = new LSCanvasCircleButton(
+	<HTMLButtonElement>document.getElementById("btnCreateCircle"), lsCanvas)
+btnCreateCircle.init()
 
 setInterval(function() {lsCanvas.draw()}, lsCanvas.timeInterval)
 
