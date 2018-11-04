@@ -123,7 +123,10 @@ var LSCanvas = /** @class */ (function () {
             this.styleBorderLeft = parseInt(document.defaultView.getComputedStyle(canvas, null)['BorderLeftWidth'], 10) || 0;
             this.styleBorderTop = parseInt(document.defaultView.getComputedStyle(canvas, null)['BorderTopWidth'], 10) || 0;
         }
+        console.log(document.defaultView.getComputedStyle(canvas, null));
         this.html = document.body.parentNode;
+        console.log(document.body.parentNode);
+        console.log(typeof (document.body.parentNode));
         this.htmlTop = this.html.offsetTop;
         this.htmlLeft = this.html.offsetLeft;
         this.valid = false;
@@ -157,6 +160,8 @@ var LSCanvas = /** @class */ (function () {
             // console.log(jsonArray[i])
             // console.log(jsonArray[i]["x"])
             // console.log(typeof(jsonArray[i]["x"]))
+            console.log(jsonArray[i]);
+            // console.lo
             var x = jsonArray[i]["x"];
             var y = jsonArray[i]["y"];
             var width = jsonArray[i]["width"];

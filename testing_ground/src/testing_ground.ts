@@ -24,10 +24,11 @@ class DrawableShape {
 }
 
 class Rectangle {
-	x: number
+	x:number
 	y: number
 	width: number
 	height: number
+	rotation:number
 	fill: any
 	selectionColor:string 
 	beingHovered:boolean
@@ -38,7 +39,7 @@ class Rectangle {
 	scalingFactor:number
 	scalingRatio:number
 
-	rotation:number
+	
 
 	constructor(x:number, y:number, width:number, height:number, rotation?:number, fill?:any) {
 		this.x = x || 0
@@ -137,14 +138,14 @@ class LSCanvas {
 	height:number
 	context:any
 
-	stylePaddingLeft:any
-	stylePaddingTop:any			// naming convention for class variables???
-	styleBorderLeft:any
-	styleBorderTop:any
+	stylePaddingLeft:number
+	stylePaddingTop:number			// naming convention for class variables???
+	styleBorderLeft:number
+	styleBorderTop:number
 
 	html:any
-	htmlTop:any
-	htmlLeft:any
+	htmlTop:number
+	htmlLeft:number
 
 	shapes:Rectangle[]
 	nShapes:number
@@ -175,7 +176,13 @@ class LSCanvas {
 			this.styleBorderTop = parseInt(document.defaultView.getComputedStyle(canvas, null)['BorderTopWidth'], 10)     || 0
 		}
 
+		console.log(document.defaultView.getComputedStyle(canvas, null))
+
 		this.html = document.body.parentNode
+
+		console.log(document.body.parentNode)
+		console.log(typeof(document.body.parentNode))
+
 		this.htmlTop = this.html.offsetTop
 		this.htmlLeft = this.html.offsetLeft
 
@@ -212,7 +219,7 @@ class LSCanvas {
 	}
 
 	getShapesFromStorage() : Rectangle[] {
-		let jsonArray:Array<Object> = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY))
+		let jsonArray:Array<Rectangle> = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY))
 		let shapes:Rectangle[] = []
 
 		// console.log(jsonArray)		
@@ -221,6 +228,8 @@ class LSCanvas {
 			// console.log(jsonArray[i])
 			// console.log(jsonArray[i]["x"])
 			// console.log(typeof(jsonArray[i]["x"]))
+			console.log(jsonArray[i]) 
+			// console.lo
 
 			let x:number = jsonArray[i]["x"]
 			let y:number = jsonArray[i]["y"]
