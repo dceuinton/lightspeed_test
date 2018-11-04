@@ -40,7 +40,7 @@ class Rectangle {
 
 	rotation:number
 
-	constructor(x:number, y:number, width:number, height:number, fill?:any) {
+	constructor(x:number, y:number, width:number, height:number, rotation?:number, fill?:any) {
 		this.x = x || 0
 		this.y = y || 0
 		this.width = width || 40
@@ -55,7 +55,7 @@ class Rectangle {
 		this.minHeight = this.minWidth * (this.height/this.width)
 		this.scalingFactor = 0.1
 		// this.rotation = Math.PI/4
-		this.rotation = 0
+		this.rotation = rotation || 0
 	}
 
 	draw(context:any) {
@@ -113,6 +113,22 @@ class Rectangle {
 	}
 }
 
+// class SerializationHelper {
+//     static toInstance<T>(obj: T, jsonObj: any) : T {
+
+//         if (typeof obj["fromJSON"] === "function") {
+//             obj["fromJSON"](jsonObj);
+//         }
+//         else {
+//             for (var propName in jsonObj) {
+//             	// console.log(propName)
+//                 obj[propName] = jsonObj[propName] as Rectangle
+//             }
+//         }
+
+//         return obj;
+//     }
+// }
 
 // Remember to attribute simonsarris
 class LSCanvas {			
@@ -138,6 +154,9 @@ class LSCanvas {
 	dragging:boolean
 	dragOffsetX:number
 	dragOffsetY:number
+
+	SHAPE_KEY:string = "shapedata"
+
 	mState:LSCanvas
 
 	selectionWidth:number
@@ -161,8 +180,26 @@ class LSCanvas {
 		this.htmlLeft = this.html.offsetLeft
 
 		this.valid = false 
-		this.shapes = []
-		this.nShapes = 0
+
+		// if (window.sessionStorage.length > 0) {
+		// 	// this.shapes = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY))
+		// 	this.shapes = this.getShapesFromStorage()
+		// } else {
+		// 	this.shapes = []	
+		// }		
+
+		this.shapes = this.getShapesFromStorage()
+
+		// this.getShapesFromStorage()
+
+		// console.log("Hello")
+		// console.log(this.shapes)
+		// console.log(typeof(this.shapes))
+		// console.log("Bye")
+
+
+		// this.shapes = []
+		this.nShapes = this.shapes.length
 		this.dragging = false
 		this.selection = null
 		this.dragOffsetX = 0
@@ -174,12 +211,35 @@ class LSCanvas {
 		this.timeInterval = 30
 	}
 
+	getShapesFromStorage() : Rectangle[] {
+		let jsonArray:Array<Object> = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY))
+		let shapes:Rectangle[] = []
+
+		// console.log(jsonArray)		
+
+		for (let i = 0; i < jsonArray.length; i++) {
+			// console.log(jsonArray[i])
+			// console.log(jsonArray[i]["x"])
+			// console.log(typeof(jsonArray[i]["x"]))
+
+			let x:number = jsonArray[i]["x"]
+			let y:number = jsonArray[i]["y"]
+			let width:number = jsonArray[i]["width"]
+			let height:number = jsonArray[i]["height"]
+			let rotation:number = jsonArray[i]["rotation"]
+
+			shapes.push(new Rectangle(x, y, width, height, rotation))
+		}
+
+		return shapes
+	}
+
 	init() { 
 		let mCanvas:LSCanvas = this.mState
 		this.canvas.addEventListener('selectstart', function(e) {e.preventDefault(); return false})
 		
 		this.canvas.addEventListener("mousedown", function(e, Canvas:LSCanvas) {
-			console.log("MouseDown")
+			// console.log("MouseDown")
 			let mouse:any = mCanvas.getMouse(e)
 			let mouseX:number = mouse.x
 			let mouseY:number = mouse.y
@@ -253,7 +313,7 @@ class LSCanvas {
 
 		this.canvas.addEventListener('contextmenu', function(e) {
 			e.preventDefault();
-			console.log("Right Click")
+			// console.log("Right Click")
 			if (mCanvas.selection) {
 				let mouse:any = mCanvas.getMouse(e)
 				mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width/2, 
@@ -318,6 +378,8 @@ class LSCanvas {
 					this.shapes[i].x + this.shapes[i].width < 0 || this.shapes[i].y + this.shapes[i].height < 0) {
 					continue
 				}
+				// console.log(this.shapes)
+				// console.log(i)
 				this.shapes[i].draw(this.context)
 			}
 
@@ -335,9 +397,11 @@ class LSCanvas {
 
 			this.valid = true
 		}
+
+		window.sessionStorage.setItem(this.SHAPE_KEY, JSON.stringify(this.shapes))
 	}
 
-	getMouse(e) {
+	getMouse(e) {							// need to put a type on this
 		var element:any = this.canvas
 		var offsetX:number = 0
 		var offsetY:number = 0
@@ -357,22 +421,32 @@ class LSCanvas {
 		mouseX = e.pageX - offsetX
 		mouseY = e.pageY - offsetY
 
-		return {x:mouseX, y:mouseY}
+		return {x:mouseX, y:mouseY}				// put this into a custom object?
 	}
 }
 
+
+
+
+
 var s:LSCanvas = new LSCanvas(document.getElementById('canvas'))
 s.init();
-s.addShape(new Rectangle(375, 275, 100, 50))
+// s.addShape(new Rectangle(375, 275, 100, 50))
+
+
+
+
+
 
 class LSCanvasButton {
 	mBtn:HTMLButtonElement
 	mCanvas:LSCanvas
+	me:LSCanvasButton
 
 	constructor(btn:HTMLButtonElement, canvas:LSCanvas) {
 		this.mBtn = btn 
 		this.mCanvas = canvas
-		this.addMouseDownUpEventListeners()
+		// this.addMouseDownUpEventListeners()
 	}
 
 	addMouseDownUpEventListeners() {
@@ -380,17 +454,26 @@ class LSCanvasButton {
 		this.mBtn.addEventListener("mouseup", this.mouseUp, true)
 	}
 
-	mouseDown() {
-		if (s) {
+	mouseDown = () => {
+		if (this.mCanvas.selection) {
 			console.log("Canvas is a thing")
 		}
 		console.log("Clicked button")
-
 	}
 
-	mouseUp() {
+	// mouseDown() {
+	// 	if (this.mCanvas.selection) {
+	// 		console.log("Canvas is a thing")
+	// 	}
+	// 	console.log("Clicked button")
+	// }
+
+	mouseUp = () => {
 		console.log("Released click on button")
 	}
+	// mouseUp() {
+	// 	console.log("Released click on button")
+	// }
 }
 
 class LSCanvasRotationButton extends LSCanvasButton {
@@ -401,6 +484,7 @@ class LSCanvasRotationButton extends LSCanvasButton {
 	constructor(btn:HTMLButtonElement, canvas:LSCanvas, clockwise:boolean) {
 		super(btn, canvas)
 		this.mClockwise = clockwise
+		this.addMouseDownUpEventListeners()
 	}
 
 	addMouseDownUpEventListeners() {
@@ -408,29 +492,30 @@ class LSCanvasRotationButton extends LSCanvasButton {
 		this.mBtn.addEventListener("mouseup", this.mouseUp, true)
 	}
 
-	mouseDown() {
-		if (s.selection) {
-			// this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
-			this.mIntervalID = setInterval(p, this.mIntervalTime)
+	mouseDown = () => {
+		console.log(this.mCanvas)
+		if (this.mCanvas.selection) {
+			this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
+			// this.mIntervalID = setInterval(p, this.mIntervalTime)
 		}
 	}
 
-	mouseUp() {
+	mouseUp = () => {
 		clearInterval(this.mIntervalID)
 	}
 
-	rotateSelection() {
+	rotateSelection = () => {
 		console.log("Calling")
-		s.selection.rotate(0.05)
-		s.valid = false
+		this.mCanvas.selection.rotate(0.05)
+		this.mCanvas.valid = false
 	}
 }
 
 // var btnRotateClockwise:LSCanvasButton = new LSCanvasButton(
-// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s.mState)
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s)
 
-// var btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
-// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s, true)
+var btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
+	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s, true)
 
 function rotateSelectedClockwise():void {
 	if (s.selection) {
@@ -438,14 +523,14 @@ function rotateSelectedClockwise():void {
 			s.valid = false 
 		} 
 }
-var intervalClockwiseID:any = null
-var btnRotateClockwise:HTMLButtonElement = <HTMLButtonElement> document.getElementById("btnRotateClockwise")
-btnRotateClockwise.addEventListener("mousedown", function(e) {
-	intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true
-})
-btnRotateClockwise.addEventListener("mouseup", function(e) {
-	clearInterval(intervalClockwiseID)
-}, true)
+// var intervalClockwiseID:any = null
+// var btnRotateClockwise:HTMLButtonElement = <HTMLButtonElement> document.getElementById("btnRotateClockwise")
+// btnRotateClockwise.addEventListener("mousedown", function(e) {
+// 	intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true
+// })
+// btnRotateClockwise.addEventListener("mouseup", function(e) {
+// 	clearInterval(intervalClockwiseID)
+// }, true)
 
 function rotateSelectedAntiClockwise():void {
 	if (s.selection) {
@@ -462,8 +547,12 @@ btnRotateAntiClockwise.addEventListener("mouseup", function(e) {
 	clearInterval(intervalAntiClockwiseID)
 }, true)
 
+var btnCreateSquare:HTMLButtonElement = <HTMLButtonElement>document.getElementById("btnCreateSquare")
+btnCreateSquare.addEventListener("mousedown", function() {
+	s.addShape(new Rectangle(0, 0, 50, 50))
+}, true)
 
-// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
+
 
 setInterval(function() {s.mState.draw();}, s.timeInterval)	
 

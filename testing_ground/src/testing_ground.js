@@ -28,7 +28,7 @@ var DrawableShape = /** @class */ (function () {
     return DrawableShape;
 }());
 var Rectangle = /** @class */ (function () {
-    function Rectangle(x, y, width, height, fill) {
+    function Rectangle(x, y, width, height, rotation, fill) {
         this.x = x || 0;
         this.y = y || 0;
         this.width = width || 40;
@@ -43,7 +43,7 @@ var Rectangle = /** @class */ (function () {
         this.minHeight = this.minWidth * (this.height / this.width);
         this.scalingFactor = 0.1;
         // this.rotation = Math.PI/4
-        this.rotation = 0;
+        this.rotation = rotation || 0;
     }
     Rectangle.prototype.draw = function (context) {
         context.translate(this.x + this.width / 2, this.y + this.height / 2);
@@ -95,9 +95,24 @@ var Rectangle = /** @class */ (function () {
     };
     return Rectangle;
 }());
+// class SerializationHelper {
+//     static toInstance<T>(obj: T, jsonObj: any) : T {
+//         if (typeof obj["fromJSON"] === "function") {
+//             obj["fromJSON"](jsonObj);
+//         }
+//         else {
+//             for (var propName in jsonObj) {
+//             	// console.log(propName)
+//                 obj[propName] = jsonObj[propName] as Rectangle
+//             }
+//         }
+//         return obj;
+//     }
+// }
 // Remember to attribute simonsarris
 var LSCanvas = /** @class */ (function () {
     function LSCanvas(canvas) {
+        this.SHAPE_KEY = "shapedata";
         this.canvas = canvas;
         this.context = canvas.getContext('2d');
         this.width = canvas.width;
@@ -112,8 +127,20 @@ var LSCanvas = /** @class */ (function () {
         this.htmlTop = this.html.offsetTop;
         this.htmlLeft = this.html.offsetLeft;
         this.valid = false;
-        this.shapes = [];
-        this.nShapes = 0;
+        // if (window.sessionStorage.length > 0) {
+        // 	// this.shapes = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY))
+        // 	this.shapes = this.getShapesFromStorage()
+        // } else {
+        // 	this.shapes = []	
+        // }		
+        this.shapes = this.getShapesFromStorage();
+        // this.getShapesFromStorage()
+        // console.log("Hello")
+        // console.log(this.shapes)
+        // console.log(typeof(this.shapes))
+        // console.log("Bye")
+        // this.shapes = []
+        this.nShapes = this.shapes.length;
         this.dragging = false;
         this.selection = null;
         this.dragOffsetX = 0;
@@ -122,11 +149,28 @@ var LSCanvas = /** @class */ (function () {
         this.selectionWidth = 2;
         this.timeInterval = 30;
     }
+    LSCanvas.prototype.getShapesFromStorage = function () {
+        var jsonArray = JSON.parse(window.sessionStorage.getItem(this.SHAPE_KEY));
+        var shapes = [];
+        // console.log(jsonArray)		
+        for (var i = 0; i < jsonArray.length; i++) {
+            // console.log(jsonArray[i])
+            // console.log(jsonArray[i]["x"])
+            // console.log(typeof(jsonArray[i]["x"]))
+            var x = jsonArray[i]["x"];
+            var y = jsonArray[i]["y"];
+            var width = jsonArray[i]["width"];
+            var height = jsonArray[i]["height"];
+            var rotation = jsonArray[i]["rotation"];
+            shapes.push(new Rectangle(x, y, width, height, rotation));
+        }
+        return shapes;
+    };
     LSCanvas.prototype.init = function () {
         var mCanvas = this.mState;
         this.canvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; });
         this.canvas.addEventListener("mousedown", function (e, Canvas) {
-            console.log("MouseDown");
+            // console.log("MouseDown")
             var mouse = mCanvas.getMouse(e);
             var mouseX = mouse.x;
             var mouseY = mouse.y;
@@ -191,7 +235,7 @@ var LSCanvas = /** @class */ (function () {
         }, true);
         this.canvas.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-            console.log("Right Click");
+            // console.log("Right Click")
             if (mCanvas.selection) {
                 var mouse = mCanvas.getMouse(e);
                 mCanvas.addShape(new Rectangle(mouse.x - mCanvas.selection.width / 2, mouse.y - mCanvas.selection.height / 2, mCanvas.selection.width, mCanvas.selection.height));
@@ -244,6 +288,8 @@ var LSCanvas = /** @class */ (function () {
                     this.shapes[i].x + this.shapes[i].width < 0 || this.shapes[i].y + this.shapes[i].height < 0) {
                     continue;
                 }
+                // console.log(this.shapes)
+                // console.log(i)
                 this.shapes[i].draw(this.context);
             }
             if (this.selection != null) {
@@ -258,6 +304,7 @@ var LSCanvas = /** @class */ (function () {
             }
             this.valid = true;
         }
+        window.sessionStorage.setItem(this.SHAPE_KEY, JSON.stringify(this.shapes));
     };
     LSCanvas.prototype.getMouse = function (e) {
         var element = this.canvas;
@@ -275,31 +322,38 @@ var LSCanvas = /** @class */ (function () {
         offsetY += this.stylePaddingTop + this.styleBorderTop + this.htmlTop;
         mouseX = e.pageX - offsetX;
         mouseY = e.pageY - offsetY;
-        return { x: mouseX, y: mouseY };
+        return { x: mouseX, y: mouseY }; // put this into a custom object?
     };
     return LSCanvas;
 }());
 var s = new LSCanvas(document.getElementById('canvas'));
 s.init();
-s.addShape(new Rectangle(375, 275, 100, 50));
+// s.addShape(new Rectangle(375, 275, 100, 50))
 var LSCanvasButton = /** @class */ (function () {
     function LSCanvasButton(btn, canvas) {
+        var _this = this;
+        this.mouseDown = function () {
+            if (_this.mCanvas.selection) {
+                console.log("Canvas is a thing");
+            }
+            console.log("Clicked button");
+        };
+        // mouseDown() {
+        // 	if (this.mCanvas.selection) {
+        // 		console.log("Canvas is a thing")
+        // 	}
+        // 	console.log("Clicked button")
+        // }
+        this.mouseUp = function () {
+            console.log("Released click on button");
+        };
         this.mBtn = btn;
         this.mCanvas = canvas;
-        this.addMouseDownUpEventListeners();
+        // this.addMouseDownUpEventListeners()
     }
     LSCanvasButton.prototype.addMouseDownUpEventListeners = function () {
         this.mBtn.addEventListener("mousedown", this.mouseDown, true);
         this.mBtn.addEventListener("mouseup", this.mouseUp, true);
-    };
-    LSCanvasButton.prototype.mouseDown = function () {
-        if (s) {
-            console.log("Canvas is a thing");
-        }
-        console.log("Clicked button");
-    };
-    LSCanvasButton.prototype.mouseUp = function () {
-        console.log("Released click on button");
     };
     return LSCanvasButton;
 }());
@@ -308,47 +362,48 @@ var LSCanvasRotationButton = /** @class */ (function (_super) {
     function LSCanvasRotationButton(btn, canvas, clockwise) {
         var _this = _super.call(this, btn, canvas) || this;
         _this.mIntervalTime = 30;
+        _this.mouseDown = function () {
+            console.log(_this.mCanvas);
+            if (_this.mCanvas.selection) {
+                _this.mIntervalID = setInterval(_this.rotateSelection, _this.mIntervalTime);
+                // this.mIntervalID = setInterval(p, this.mIntervalTime)
+            }
+        };
+        _this.mouseUp = function () {
+            clearInterval(_this.mIntervalID);
+        };
+        _this.rotateSelection = function () {
+            console.log("Calling");
+            _this.mCanvas.selection.rotate(0.05);
+            _this.mCanvas.valid = false;
+        };
         _this.mClockwise = clockwise;
+        _this.addMouseDownUpEventListeners();
         return _this;
     }
     LSCanvasRotationButton.prototype.addMouseDownUpEventListeners = function () {
         this.mBtn.addEventListener("mousedown", this.mouseDown, true);
         this.mBtn.addEventListener("mouseup", this.mouseUp, true);
     };
-    LSCanvasRotationButton.prototype.mouseDown = function () {
-        if (s.selection) {
-            // this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)
-            this.mIntervalID = setInterval(p, this.mIntervalTime);
-        }
-    };
-    LSCanvasRotationButton.prototype.mouseUp = function () {
-        clearInterval(this.mIntervalID);
-    };
-    LSCanvasRotationButton.prototype.rotateSelection = function () {
-        console.log("Calling");
-        s.selection.rotate(0.05);
-        s.valid = false;
-    };
     return LSCanvasRotationButton;
 }(LSCanvasButton));
 // var btnRotateClockwise:LSCanvasButton = new LSCanvasButton(
-// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s.mState)
-// var btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
-// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s, true)
+// 	<HTMLButtonElement> document.getElementById("btnRotateClockwise"), s)
+var btnRotateClockwise = new LSCanvasRotationButton(document.getElementById("btnRotateClockwise"), s, true);
 function rotateSelectedClockwise() {
     if (s.selection) {
         s.selection.rotate(0.1);
         s.valid = false;
     }
 }
-var intervalClockwiseID = null;
-var btnRotateClockwise = document.getElementById("btnRotateClockwise");
-btnRotateClockwise.addEventListener("mousedown", function (e) {
-    intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true;
-});
-btnRotateClockwise.addEventListener("mouseup", function (e) {
-    clearInterval(intervalClockwiseID);
-}, true);
+// var intervalClockwiseID:any = null
+// var btnRotateClockwise:HTMLButtonElement = <HTMLButtonElement> document.getElementById("btnRotateClockwise")
+// btnRotateClockwise.addEventListener("mousedown", function(e) {
+// 	intervalClockwiseID = setInterval(rotateSelectedClockwise, 30), true
+// })
+// btnRotateClockwise.addEventListener("mouseup", function(e) {
+// 	clearInterval(intervalClockwiseID)
+// }, true)
 function rotateSelectedAntiClockwise() {
     if (s.selection) {
         s.selection.rotate(-0.1);
@@ -363,7 +418,10 @@ btnRotateAntiClockwise.addEventListener("mousedown", function (e) {
 btnRotateAntiClockwise.addEventListener("mouseup", function (e) {
     clearInterval(intervalAntiClockwiseID);
 }, true);
-// s.addShape(new Rectangle(40, 40, 50, 50, 'lightskyblue'))
+var btnCreateSquare = document.getElementById("btnCreateSquare");
+btnCreateSquare.addEventListener("mousedown", function () {
+    s.addShape(new Rectangle(0, 0, 50, 50));
+}, true);
 setInterval(function () { s.mState.draw(); }, s.timeInterval);
 // // init()
 // // wtf is jQuery
