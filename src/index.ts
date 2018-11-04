@@ -1,5 +1,6 @@
 import {LSCanvas} from "./LSCanvas"
 // import {Rectangle} from "./Shapes"
+import {Star} from "./Shapes"
 // import {LSCanvasButton} from "./Buttons"
 import {LSCanvasRotationButton} from "./Buttons"
 import {LSCanvasRectangleButton} from "./Buttons"
@@ -7,9 +8,11 @@ import {LSCanvasCircleButton} from "./Buttons"
 
 let lsCanvas:LSCanvas = new LSCanvas(<HTMLCanvasElement>document.getElementById("canvas"))
 lsCanvas.init()
+let s:Star = new Star(50, 50, 50, 5, 0)
 // let rect:Rectangle = new Rectangle(375, 275, 50, 40)
 // console.log(rect)
 // lsCanvas.addShape(rect)
+lsCanvas.addShape(s)
 
 let btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
 	<HTMLButtonElement>document.getElementById("btnRotateClockwise"), lsCanvas, true)

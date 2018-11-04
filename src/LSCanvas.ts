@@ -1,6 +1,7 @@
 import {Shape} from "./Shapes"
 import {Rectangle} from "./Shapes"
 import {Circle} from "./Shapes"
+// import {Star} from "./Shapes"
 
 /*
 Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 

@@ -228,8 +228,80 @@ class Circle extends Shape {
 
 }
 
+class Star extends Shape {
+
+	minRadius:number
+	innerRadius:number
+
+	constructor(x:number, y:number, radius:number, points:number, rotation:number) {
+		super(x, y, rotation)
+		this.radius = radius
+		this.points = points
+
+		this.minRadius = 40
+		this.innerRadius = this.radius * 2 / 3
+
+		// this.color = "#FFFF1A"
+		this.color = "#000000"
+		this.selectionColor = "#999900"
+		this.hoverColor = "#E6E600"
+
+		this._type = "STAR"
+	}
+
+	draw(context:CanvasRenderingContext2D):void {
+		this.drawOutline(context)
+		// context.fill()
+	}
+
+	drawOutline(context:CanvasRenderingContext2D):void {
+		context.translate(this.x, this.y)
+
+		// context.rotate(this.rotation)
+		if (this.beingHovered) {
+			context.fillStyle = this.hoverColor	
+		} else {
+			context.fillStyle = this.color	
+		}		
+		
+		// let nPoints:number = this.points * 2
+		let deltaPI:number = Math.PI/(this.points * 2)
+		let angle:number = 2 * Math.PI * 3 / 2
+
+		context.beginPath()
+		context.moveTo(this.x, this.y - this.radius)
+		for (let i = 0; i < this.points; i++) {
+			context.rotate(deltaPI)
+			// let nextX:number = this.x + this.radius * Math.cos(angle)
+			// let nextY:number = this.y + this.radius * Math.sin(angle)
+			// angle += deltaPI
+			context.lineTo(0, 0 - this.innerRadius)
+			context.rotate(deltaPI)
+			context.lineTo(0, 0 - this.radius)
+			// nextX = this.x + this.innerRadius * Math.cos(angle)
+			// nextY = this.y + this.innerRadius * Math.sin(angle)
+			// angle += deltaPI
+			// context.lineTo(nextX, nextY)			
+		}
+		// context.closePath()
+
+		context.setTransform(1, 0, 0, 1, 0, 0)
+	}
+
+
+	contains(x:number, y:number):boolean {return false}
+
+	scale(delta:number):void {
+		this.radius += delta;
+		if (this.radius < this.minRadius) {
+			this.radius = this.minRadius
+		}
+	}
+}
+
 
 export{Shape}
 export {Rectangle}
 export {Circle}
+export {Star}
 

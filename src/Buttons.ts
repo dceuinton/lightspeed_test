@@ -1,6 +1,7 @@
 import {LSCanvas} from "./LSCanvas"
 import {Rectangle} from "./Shapes"
 import {Circle} from "./Shapes"
+import {Star} from "./Shapes"
 
 class LSCanvasButton {
 	mBtn:HTMLButtonElement
