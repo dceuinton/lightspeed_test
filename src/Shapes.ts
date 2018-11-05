@@ -49,8 +49,9 @@ class Shape {
 		console.log(context)
 	}
 
-	contains(x:number, y:number, context?:CanvasRenderingContext2D):boolean {
+	contains(x:number, y:number, canvas?:CanvasRenderingContext2D):boolean {
 		if (this.x == x && this.y == y) {
+			console.log(canvas)
 			return true
 		} 
 		return false 
@@ -274,7 +275,7 @@ class Star extends Shape {
 	}
 
 
-	contains(x:number, y:number, context:CanvasRenderingContext2D):boolean {
+	contains(x:number, y:number):boolean {
 		
 		
 
@@ -284,7 +285,8 @@ class Star extends Shape {
 		if (radius <= this.innerRadius) {return true}
 		let angle:number = translatedX>0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)// + this.rotation
 		
-		
+		angle += 2*Math.PI
+		angle = angle % (2*Math.PI) 
 	
 		// angle = (angle + (3*Math.PI/2)) % (2*Math.PI)
 
@@ -292,59 +294,74 @@ class Star extends Shape {
 		let distance:number = 100 // arbitry high number
 
 		let startingAngle:number = 3*Math.PI/2 + this.rotation
+		let step:number = 2*Math.PI/this.points
 
 		for (let i = 0; i < this.points; i++) {
-			startingAngle = (startingAngle + i*2*Math.PI/this.points) % (2*Math.PI)
-			console.log("Starting Angle: "+startingAngle)
-			let dis:number = angle - startingAngle
+			startingAngle = (startingAngle + step) % (2*Math.PI)
+			// console.log("Starting Angle: "+startingAngle)
+			// let dis:number = (angle - startingAngle) % (2*Math.PI)
+			// let dis:number = (startingAngle - angle) % (2*Math.PI)
+			let dis:number = this.getShorterDifferenceAroundCircle(startingAngle, angle)
+
 			let absDis:number = Math.abs(dis)
-			if (absDis < distance) {
-				distance = absDis 
+			if (absDis < Math.abs(distance)) {
+				distance = dis 
 				closestAngle = startingAngle
 			}
 		}
 
-		context.beginPath()
-		context.moveTo(this.x, this.y)
-		// context.lineTo(x, y)
-		context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
-		context.strokeStyle = "#CC0000"
-		context.stroke()
-
 		// context.beginPath()
-		// context.moveTo(this.x + this.radius*Math.cos(startingAngle), this.y + this.radius*Math.sin(startingAngle))
-		// context.lineTo(this.x, this.y)
-		// context.strokeStyle = "#0066FF"
+		// context.moveTo(this.x, this.y)
+		// // context.lineTo(x, y)
+		// context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
+		// context.strokeStyle = "#CC0000"
 		// context.stroke()
 
-		context.beginPath()
-		context.strokeStyle = "#CC08800"
-		context.moveTo(this.x + this.radius*Math.cos(closestAngle), this.y + this.radius*Math.sin(closestAngle))
-		context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
+		// // context.beginPath()
+		// // context.moveTo(this.x + this.radius*Math.cos(startingAngle), this.y + this.radius*Math.sin(startingAngle))
+		// // context.lineTo(this.x, this.y)
+		// // context.strokeStyle = "#0066FF"
+		// // context.stroke()
+
+		// context.beginPath()
+		// context.strokeStyle = "#CC08800"
+		// context.moveTo(this.x + this.radius*Math.cos(closestAngle), this.y + this.radius*Math.sin(closestAngle))
+		// context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
 		
-		context.stroke()
+		// context.stroke()
 	
 		// console.log("Angle and Rad: " + angle + " " + radius)
-		console.log("Angle: " + angle)
-		console.log("Closest Angle: " + closestAngle)
-		console.log("dif: " + distance)
-		console.log("Pi over 5: " + Math.PI/5)
+		// console.log("Angle: " + angle)
+		// console.log("Closest Angle: " + closestAngle)
+		// console.log("dif: " + distance)
+		// console.log("Pi over 5: " + Math.PI/5)
 
-		if (distance < Math.PI/(this.points*2)) {
+		if (distance < 0) {
 		// if (section % 2 == 1) {
 			// console.log("Distance: " + distance)
 			// console.log("HL rad of star: " + this.highToLowRadius(angle + 3*Math.PI/2))
-			if (radius <=  this.highToLowRadius(angle + closestAngle)) {
+			if (radius <=  this.highToLowRadius(angle - closestAngle)) {
 				return true
 			}
 		} else {
 			// console.log("Distance: " + distance)
 			// console.log("LH rad of star: " + this.lowToHighRadius(angle + 3*Math.PI/2))
-			if (radius <= this.lowToHighRadius(angle + closestAngle)) {
+			if (radius <= this.lowToHighRadius(angle - closestAngle)) {
 				return true
 			}
 		}
 		return false
+	}
+
+	// inputs must both be positive
+	getShorterDifferenceAroundCircle(angle1:number, angle2:number):number {
+		let dif1:number = angle1 - angle2
+		if ((2*Math.PI - angle1 + angle2) * (2*Math.PI - angle1 + angle2) < dif1*dif1) {
+			dif1 = 2*Math.PI - angle1 + angle2
+		} else if ((2*Math.PI - angle2 + angle1) * (2*Math.PI - angle2 + angle1) < dif1*dif1) {
+			dif1 = (2*Math.PI - angle2 + angle1)
+		}
+		return dif1
 	}
 
 	// cartesianToPolar(x:number, y:number):number {
@@ -359,7 +376,7 @@ class Star extends Shape {
 
 	lowToHighRadius(angle:number):number {
 		// return (5/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius - 17/2*(this.radius - this.innerRadius))
-		return this.points/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius
+		return this.points/Math.PI*(this.radius - this.innerRadius)*angle + this.radius
 	}	
 
 	scale(delta:number):void {

@@ -206,7 +206,7 @@ class LSCanvas {
 		}, true)
 
 		this.canvas.addEventListener('mousemove', function(e:MouseEvent) {
-			mCanvas.valid = false													// remember this is for debugging
+			// mCanvas.valid = false													// remember this is for debugging
 			let mouse:MouseLocation = mCanvas.getMouse(e)
 			if (mCanvas.dragging && mCanvas.liveSelection()) {				
 				mCanvas.selection.x = mouse.x - mCanvas.dragOffsetX
