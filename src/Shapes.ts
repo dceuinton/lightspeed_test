@@ -239,10 +239,10 @@ class Star extends Shape {
 		this.points = points
 
 		this.minRadius = 40
-		this.innerRadius = this.radius * 2 / 3
+		this.innerRadius = this.radius * 1 / 2
 
-		// this.color = "#FFFF1A"
-		this.color = "#000000"
+		this.color = "#FFFF1A"
+		// this.color = "#000000"
 		this.selectionColor = "#999900"
 		this.hoverColor = "#E6E600"
 
@@ -250,52 +250,165 @@ class Star extends Shape {
 	}
 
 	draw(context:CanvasRenderingContext2D):void {
-		this.drawOutline(context)
-		// context.fill()
+		context.fillStyle = this.beingHovered ? this.hoverColor : this.color
+		this.drawOutline(context, this.color)
+		context.fill()
 	}
 
-	drawOutline(context:CanvasRenderingContext2D):void {
+	drawOutline(context:CanvasRenderingContext2D, color?:string):void {
 		context.translate(this.x, this.y)
-
-		// context.rotate(this.rotation)
-		if (this.beingHovered) {
-			context.fillStyle = this.hoverColor	
-		} else {
-			context.fillStyle = this.color	
-		}		
-		
-		// let nPoints:number = this.points * 2
-		let deltaPI:number = Math.PI/(this.points * 2)
-		let angle:number = 2 * Math.PI * 3 / 2
-
+		context.rotate(this.rotation)		
+		context.strokeStyle = color || this.selectionColor
+		context.lineWidth = this.strokeWidth
+		let deltaPI:number = Math.PI/(this.points)
 		context.beginPath()
-		context.moveTo(this.x, this.y - this.radius)
+		context.moveTo(0, - this.radius)
 		for (let i = 0; i < this.points; i++) {
 			context.rotate(deltaPI)
-			// let nextX:number = this.x + this.radius * Math.cos(angle)
-			// let nextY:number = this.y + this.radius * Math.sin(angle)
-			// angle += deltaPI
 			context.lineTo(0, 0 - this.innerRadius)
 			context.rotate(deltaPI)
 			context.lineTo(0, 0 - this.radius)
-			// nextX = this.x + this.innerRadius * Math.cos(angle)
-			// nextY = this.y + this.innerRadius * Math.sin(angle)
-			// angle += deltaPI
-			// context.lineTo(nextX, nextY)			
 		}
-		// context.closePath()
-
+		context.stroke()
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	}
 
 
-	contains(x:number, y:number):boolean {return false}
+	contains(x:number, y:number):boolean {
+		let translatedX:number = x - this.x 
+		let translatedY:number = y - this.y 
+		let distance:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
+		if (distance <= this.innerRadius) {return true}
+		// let angle:number = Math.atan(translatedY/translatedX)
+		// // console.log(angle*180/Math.PI)
+		// let translatedRotatedX:number = distance * Math.cos(angle - this.rotation)
+		// let translatedRotatedY:number = distance * Math.sin(angle - this.rotation)
+		// angle = Math.atan(translatedRotatedY/translatedRotatedX)
+		
+		// // console.log(angle)
+		// // console.log()
+
+		// // angle = (Math.PI / 2) + (angle % (2 * Math.PI / 5))
+		// angle = (angle + (3*Math.PI/2)) % Math.PI/5
+		// console.log("Angle and Rad: " + angle + " " + distance)
+
+		// if (angle < Math.PI/10) {
+		// 	console.log("Distance: " + distance)
+		// 	console.log("rad of star: " + this.highToLowRadius(angle + 3*Math.PI/2))
+		// 	if (distance <=  this.highToLowRadius(angle + 3*Math.PI/2)) {
+		// 		return true
+		// 	}
+		// } else {
+		// 	console.log("Distance: " + distance)
+		// 	console.log("rad of star: " + this.lowToHighRadius(angle + 3*Math.PI/2))
+		// 	if (distance <= this.lowToHighRadius(angle + 3*Math.PI/2)) {
+		// 		return true
+		// 	}
+		// }
+		return false
+
+
+	}
+
+	highToLowRadius(angle:number):number {
+		return (5/Math.PI*(this.innerRadius - this.radius)*angle + this.innerRadius + 17/2*(this.radius - this.innerRadius))
+	}
+
+	lowToHighRadius(angle:number):number {
+		return (5/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius - 17/2*(this.radius - this.innerRadius))
+	}	
 
 	scale(delta:number):void {
 		this.radius += delta;
-		if (this.radius < this.minRadius) {
-			this.radius = this.minRadius
+		if (this.radius < this.minRadius) {this.radius = this.minRadius}
+	}
+}
+
+class Triangle extends Shape {
+	minRadius:number 
+
+	constructor(x:number, y:number, radius:number, rotation:number) {
+		super(x, y, rotation)
+		this.radius = radius
+		this.points = 3
+
+		this.minRadius = 40
+
+		this.color = "#00FF00"
+		this.selectionColor = "#008000"
+		this.hoverColor = "#00CC00"
+
+		this._type = "TRIANGLE"
+	}
+
+	draw(context:CanvasRenderingContext2D):void {
+		context.fillStyle = this.beingHovered ? this.hoverColor : this.color
+		this.drawOutline(context, this.color)
+		context.fill()
+	}
+
+	drawOutline(context:CanvasRenderingContext2D, color?:string):void {
+		context.translate(this.x, this.y)
+		context.rotate(this.rotation)		
+		context.strokeStyle = color || this.selectionColor
+		context.lineWidth = this.strokeWidth
+		let deltaPI:number = 2*Math.PI/(this.points)
+		context.beginPath()
+		context.moveTo(0, - this.radius)
+		for (let i = 0; i < this.points; i++) {
+			context.rotate(deltaPI)
+			context.lineTo(0, 0 - this.radius)
 		}
+		context.closePath()
+		context.stroke()
+		context.setTransform(1, 0, 0, 1, 0, 0)
+	}
+
+	// Method borrowed from https://www.gamedev.net/forums/topic/295943-is-this-a-better-point-in-triangle-test-2d/
+	contains(x:number, y:number):boolean {
+		// console.log(this.getTrianglePoints())
+		let points:number[] = this.getTrianglePoints() 
+		if (points.length < 6) {return false}
+
+		let totalArea:number = this.calcTriArea(points[0], points[1], points[2], points[3], points[4], points[5])
+		let area1:number = this.calcTriArea(x, y, points[2], points[3], points[4], points[5])
+		let area2:number = this.calcTriArea(points[0], points[1], x, y, points[4], points[5])
+		let area3:number = this.calcTriArea(points[0], points[1], points[2], points[3], x, y)
+
+
+		// console.log("Total: " + totalArea)
+		// console.log("area1: " + area1)
+		// console.log("area2: " + area2)
+		// console.log("area3: " + area3)
+
+		if ((area1 + area2 + area3) > totalArea + 0.5) {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	// Method borrowed from https://www.gamedev.net/forums/topic/295943-is-this-a-better-point-in-triangle-test-2d/
+	calcTriArea(p1x:number, p1y:number, p2x:number, p2y:number, p3x:number, p3y:number):number {
+		let determinant:number = 0.0
+		determinant = (p1x - p3x)*(p2y - p3y) - (p2x - p3x)*(p1y - p3y)
+		return Math.abs( determinant/2)
+	}
+
+	getTrianglePoints():number[] {
+		let numbers:number[] = []
+		let baseAngle:number = this.rotation + 3*Math.PI/2
+		let step:number = 2*Math.PI/this.points
+		for (let i = 0; i < this.points; i++) {
+			numbers.push(this.x + this.radius*Math.cos(baseAngle + i*step))
+			numbers.push(this.y + this.radius*Math.sin(baseAngle + i*step))
+		}
+		return numbers
+	}
+
+	scale(delta:number):void {
+		this.radius += delta 
+		if (this.radius < this.minRadius) {this.radius = this.minRadius}
 	}
 }
 
@@ -304,4 +417,5 @@ export{Shape}
 export {Rectangle}
 export {Circle}
 export {Star}
+export {Triangle}
 

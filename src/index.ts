@@ -1,18 +1,15 @@
 import {LSCanvas} from "./LSCanvas"
 // import {Rectangle} from "./Shapes"
-import {Star} from "./Shapes"
+// import {Star} from "./Shapes"
 // import {LSCanvasButton} from "./Buttons"
 import {LSCanvasRotationButton} from "./Buttons"
 import {LSCanvasRectangleButton} from "./Buttons"
 import {LSCanvasCircleButton} from "./Buttons"
+import {LSCanvasStarButton} from "./Buttons"
+import {LSCanvasTriangleButton} from "./Buttons"
 
 let lsCanvas:LSCanvas = new LSCanvas(<HTMLCanvasElement>document.getElementById("canvas"))
 lsCanvas.init()
-let s:Star = new Star(50, 50, 50, 5, 0)
-// let rect:Rectangle = new Rectangle(375, 275, 50, 40)
-// console.log(rect)
-// lsCanvas.addShape(rect)
-lsCanvas.addShape(s)
 
 let btnRotateClockwise:LSCanvasRotationButton = new LSCanvasRotationButton(
 	<HTMLButtonElement>document.getElementById("btnRotateClockwise"), lsCanvas, true)
@@ -29,9 +26,12 @@ let btnCreateCircle:LSCanvasCircleButton = new LSCanvasCircleButton(
 	<HTMLButtonElement>document.getElementById("btnCreateCircle"), lsCanvas)
 btnCreateCircle.init()
 
+let btnCreateStar:LSCanvasStarButton = new LSCanvasStarButton(
+	<HTMLButtonElement>document.getElementById("btnCreateStar"), lsCanvas)
+btnCreateStar.init()
+
+let btnCreateTriangle:LSCanvasTriangleButton = new LSCanvasTriangleButton(
+	<HTMLButtonElement>document.getElementById("btnCreateTriangle"), lsCanvas)
+btnCreateTriangle.init()
+
 setInterval(function() {lsCanvas.draw()}, lsCanvas.timeInterval)
-
-// console.log("Hello, world");
-
-// let product:string = "Dale"
-// console.log(typeof(product));

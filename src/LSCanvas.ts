@@ -1,7 +1,8 @@
 import {Shape} from "./Shapes"
 import {Rectangle} from "./Shapes"
 import {Circle} from "./Shapes"
-// import {Star} from "./Shapes"
+import {Star} from "./Shapes"
+import {Triangle} from "./Shapes"
 
 /*
 Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
@@ -122,24 +123,23 @@ class LSCanvas {
 				let x:number = jsonArray[i]["x"]
 				let y:number = jsonArray[i]["y"]
 				let rotation:number = jsonArray[i]["rotation"]
+				let width:number = jsonArray[i]["width"]
+				let height:number = jsonArray[i]["height"]
+				let radius:number = jsonArray[i]["radius"]
+				let points:number = jsonArray[i]["points"]
 
 				switch(jsonArray[i]._type) {
 					case "RECTANGLE":
-					let width:number = jsonArray[i]["width"]
-					let height:number = jsonArray[i]["height"]
 					shapes.push(new Rectangle(x, y, width, height, rotation))
 					break;
 					case "CIRCLE":
-					let radius:number = jsonArray[i]["radius"]
 					shapes.push(new Circle(x, y, radius))
 					break;
-					case "STAR":
-					// let radius:number = jsonArray[i]["radius"]
-					// let points:number = jsonArray[i]["points"]
+					case "STAR":					
+					shapes.push(new Star(x, y, radius, points, rotation))
 					break;
 					case "TRIANGLE":
-					// let radius:number = jsonArray[i]["radius"]
-					// let points:number = jsonArray[i]["points"]
+					shapes.push(new Triangle(x, y, radius, rotation))
 					break;
 					default:
 					console.log("Type of shape has not been set")
@@ -253,10 +253,12 @@ class LSCanvas {
 
 					break;
 					case "STAR":
-					
+					mCanvas.addShape(new Star(mouse.x, mouse.y, 
+						mCanvas.selection.radius, mCanvas.selection.points,
+						mCanvas.selection.rotation))
 					break;
 					case "TRIANGLE":
-					
+					mCanvas.addShape(new Triangle(mouse.x, mouse.y, mCanvas.selection.radius, mCanvas.selection.rotation))
 					break;
 					default:
 					console.log("Type of shape has not been set")
