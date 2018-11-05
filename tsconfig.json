@@ -3,7 +3,8 @@
     "outDir": "dist/",
     "sourceMap": true,
     "inlineSourceMap": false,
-    "module": "es6",
+    // "module": "es6",
+    "module": "commonjs",
     "target": "es2015",
     "lib": ["es6", "dom"],
 

@@ -1,3 +1,9 @@
+// Classes: Shape, Rectangle, Circle, Star, Triangle 
+// Purpose: To hold shape data and provide means of drawing them 
+// Shape is the superclass and all specific shapes should implement to shape
+
+// Notes: Star.contains(x,y) is not fully functional 
+
 class Shape {
 	x:number 
 	y:number
@@ -218,7 +224,9 @@ class Star extends Shape {
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	}
 
-
+	// This method still needs to be debugged, not yet perfect 
+	// Idea is to turn the star's radius into a function of theta 
+	// and check to see whether the point x, y at theta has a smaller radius 
 	contains(x:number, y:number):boolean {
 		let translatedX:number = x - this.x 
 		let translatedY:number = y - this.y 

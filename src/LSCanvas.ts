@@ -4,10 +4,16 @@ import {Circle} from "./Shapes"
 import {Star} from "./Shapes"
 import {Triangle} from "./Shapes"
 
-/*
-Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
-This particularly influenced the getMouse and draw methods however I have made changes to these as well
-*/
+// Class: LSCanvas
+// Purpose: Handling drawing and manipulation of shapes on the HTMLCanvasElement
+// Use:
+// 		Creation
+//		init() 
+// 		setInterval(function() {LSCanvas.draw(context)}, interval)
+
+// Attribution:
+// Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
+// This particularly influenced the getMouse and draw methods
 
 const CSS_STYLE_PADDING_LEFT:number = 102
 const CSS_STYLE_PADDING_TOP:number = 104
@@ -80,6 +86,7 @@ class LSCanvas {
 		this.timeInterval = 30
 	}
 
+	// Purpose: Gets shape array from local storage and initialises the array with the shape data 
 	getShapesFromStorage() : Shape[] {
 		let shapes:Shape[] = []
 		if (window.sessionStorage.getItem(SHAPE_DATA_KEY)) {
@@ -118,11 +125,15 @@ class LSCanvas {
 		return shapes
 	}
 
-	init() { 
+	// Purpose: Initialise all the eventListeners 
+	init():void { 
 		let mCanvas:LSCanvas = this.mState
 		let mContext:CanvasRenderingContext2D = this.context
 		this.canvas.addEventListener('selectstart', function(e:Event) {e.preventDefault(); return false})
 		
+		// Mouse Down Event Listener: Checks all shapes to see if they are being clicked 
+		// or deselects one if it is already selected
+		// Enables dragging of shapes if a shape is clicked and invalidates the canvas 
 		this.canvas.addEventListener("mousedown", function(e:MouseEvent) {
 			let mouse:MouseLocation = mCanvas.getMouse(e)
 			let mouseX:number = mouse.x
@@ -147,6 +158,8 @@ class LSCanvas {
 			}
 		}, true) 
 
+		// Mouse Up Event Listener: If a shape is selected it stops dragging it when the mouse button is released
+		// and invalidates the canvas
 		this.canvas.addEventListener("mouseup", function() {
 			if (mCanvas.liveSelection()) {
 				mCanvas.dragging = false
@@ -154,6 +167,7 @@ class LSCanvas {
 			}
 		}, true)
 
+		// Mouse Wheel Event Listener: Used to scale the selected shape 
 		this.canvas.addEventListener("wheel", function(e:MouseWheelEvent) {
 			if (mCanvas.liveSelection()) {
 				mCanvas.selection.scale(e.deltaY * mCanvas.selection.scalingFactor * -1)
@@ -161,6 +175,9 @@ class LSCanvas {
 			mCanvas.valid = false
 		}, true)
 
+		// Mouse Movement Event Listener: Used to check whether a shape is being hovered over and drawn differently
+		// as well as handle shape dragging movement. Invalidates canvas if a shape was being hovered, now is being hovered
+		// or a shape is being dragged 
 		this.canvas.addEventListener('mousemove', function(e:MouseEvent) {
 			let mouse:MouseLocation = mCanvas.getMouse(e)
 			if (mCanvas.dragging && mCanvas.liveSelection()) {				
@@ -183,6 +200,7 @@ class LSCanvas {
 			}
 		}, true)
 
+		// Right Click: Duplicates the selected shape and invalidates canvas 
 		this.canvas.addEventListener('contextmenu', function(e:MouseEvent) {
 			e.preventDefault();
 			if (mCanvas.liveSelection()) {
@@ -214,6 +232,7 @@ class LSCanvas {
 			return false
 		}, true)
 
+		// Double Click: Deletes selected shape and invalidates canvas
 		this.canvas.addEventListener('dblclick', function(e:MouseEvent) {
 			let mouse:MouseLocation = mCanvas.getMouse(e) 
 			for (let i = 0; i < mCanvas.nShapes; i++)	 {
@@ -227,6 +246,7 @@ class LSCanvas {
 		}, true)
 	}
 
+	// Purpose: Used to ensure the most recently clicked on shape is drawn first
 	moveToFrontOfShapes(shapes:Shape[], s:Shape, index:number) {
 		if (index > 0) {
 			for (var i = index; i > 0; i--) {
@@ -254,6 +274,7 @@ class LSCanvas {
 		this.context.clearRect(0, 0, this.width, this.height)
 	}
 
+	// Purpose: Cycles through shapes and draws them to the screen
 	draw() {
 		if (!this.valid) {
 			this.clear()
@@ -277,7 +298,8 @@ class LSCanvas {
 		window.sessionStorage.setItem(this.SHAPE_KEY, JSON.stringify(this.shapes))
 	}
 
-	getMouse(e:MouseEvent):MouseLocation {							// method borrowed from simon sarris 
+	// Purpose: To get the x and y of the mouse taking into account borders and padding 
+	getMouse(e:MouseEvent):MouseLocation {					
 		let element:any = this.canvas
 		let offsetX:number = 0
 		let offsetY:number = 0
@@ -311,6 +333,7 @@ class LSCanvas {
 	}
 }
 
+// Purpose: To hold mouse location data 
 class MouseLocation {
 	[coordinate:string]:number
 	x:number 

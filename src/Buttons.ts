@@ -4,6 +4,10 @@ import {Circle} from "./Shapes"
 import {Star} from "./Shapes"
 import {Triangle} from "./Shapes"
 
+// Classes: LSCanvasButton, LSCanvasRotationButton, LSCanvasRectangleButton, LSCanvasCircleButton, LSCanvasStarButton, LSCanvasTriangleButton
+// Purpose: To create the data structures to implement buttons for rotating and creating shapes in the LSCanvas 
+// LSCavnasButton is the super class that all specific buttons should implement 
+
 class LSCanvasButton {
 	mBtn:HTMLButtonElement
 	mCanvas:LSCanvas
