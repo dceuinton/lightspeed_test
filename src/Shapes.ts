@@ -2,52 +2,38 @@ class Shape {
 	x:number 
 	y:number
 	rotation:number 
-
 	width:number
 	height:number
 	radius:number
 	points:number
-
 	color:string 
 	selectionColor:string 
 	hoverColor:string 
 	strokeWidth:number
-
 	beingHovered:boolean 
-
 	scalingFactor:number
-
 	_type:string
 
 	constructor(x:number, y:number, rotation?:number) {
 		this.x = x 
 		this.y = y 
 		this.rotation = rotation || 0
-
 		this.color          = "#000000"
 		this.selectionColor = "#000000"
 		this.hoverColor     = "#000000"
 		this.strokeWidth = 3
-
 		this.beingHovered = false 
-
 		this.scalingFactor = 0.1
-
 		this._type = "SHAPE"
-
 		this.width = 0
 		this.height = 0
 		this.radius = 0
 		this.points = 0
 	}
 
-	draw(context:CanvasRenderingContext2D):void {
-		console.log(context)
-	}
+	draw(context:CanvasRenderingContext2D):void {console.log(context)}
 
-	drawOutline(context:CanvasRenderingContext2D):void {
-		console.log(context)
-	}
+	drawOutline(context:CanvasRenderingContext2D):void {console.log(context)}
 
 	contains(x:number, y:number, canvas?:CanvasRenderingContext2D):boolean {
 		if (this.x == x && this.y == y) {
@@ -57,13 +43,9 @@ class Shape {
 		return false 
 	} 
 
-	rotate(radians:number) {
-		this.rotation += (radians % (2 * Math.PI))
-	}
+	rotate(radians:number) {this.rotation += (radians % (2 * Math.PI))}
 
-	scale(delta:number) {
-		console.log(delta)
-	}
+	scale(delta:number) {console.log(delta)}
 
 }
 
@@ -75,54 +57,28 @@ class Rectangle extends Shape {
 	scalingRatio:number	
 
 	constructor(x:number, y:number, width:number, height:number, rotation:number) {
-		
 		super(x, y, rotation)
 		this.width = width
 		this.height = height 
-		
 		this.color = "#00CCFF"
 		this.selectionColor = "#006680"
 		this.hoverColor = "#00A3CC"
-
 		this.scalingRatio = this.height/this.width
 		this.minWidth = 40
 		this.minHeight = this.scalingRatio * this.minWidth
-
 		this._type = "RECTANGLE"
-
-		// this.x = x || 0
-		// this.y = y || 0
-		// this.width = width || 40
-		// this.height = height || 30
-		// this.fill = fill || "#32FAFA"
-		// this.selectionColor = "#105151"
-		// this.beingHovered = false
-		// this.hoverColor = "#2EE6E6"
-		// // this.hoverColor = "#CC0000"
-		// this.scalingRatio = this.width/this.height
-		// this.minWidth = 40
-		// this.minHeight = this.minWidth * (this.height/this.width)
-		// this.scalingFactor = 0.1
-		// // this.rotation = Math.PI/4
-		// this.rotation = rotation || 0
 	}
 
 	draw(context:CanvasRenderingContext2D):void {
 		context.translate(this.x + this.width/2, this.y + this.height/2)
-
 		context.rotate(this.rotation)
-		if (this.beingHovered) {
-			context.fillStyle = this.hoverColor	
-		} else {
-			context.fillStyle = this.color	
-		}		
+		context.fillStyle = this.beingHovered? this.hoverColor : this.color	
 		context.fillRect(-this.width/2, -this.height/2, this.width, this.height)
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	} 
 
 	drawOutline(context:CanvasRenderingContext2D) {
 		context.translate(this.x + this.width/2, this.y + this.height/2)
-
 		context.rotate(this.rotation)
 		context.strokeStyle = this.selectionColor	
 		context.lineWidth = this.strokeWidth
@@ -153,14 +109,12 @@ class Rectangle extends Shape {
 		let midY:number = this.y + this.height/2
 		let newWidth:number = this.width + delta
 		let newHeight:number = this.height + this.scalingRatio * delta
-
 		if (newWidth < this.minWidth) {
 			newWidth = this.minWidth
 		}
 		if (newHeight < this.minHeight) {
 			newHeight = this.minHeight	
 		}
-
 		this.x = midX - newWidth/2
 		this.y = midY - newHeight/2
 		this.width = newWidth
@@ -175,13 +129,10 @@ class Circle extends Shape {
 	constructor(x:number, y:number, radius:number) {
 		super(x, y)
 		this.radius = radius
-
 		this.minRadius = 40
-
 		this.color = "#FF0066"
 		this.selectionColor = "#800033"
 		this.hoverColor = "#CC0052"
-
 		this._type = "CIRCLE"
 	}
 
@@ -193,7 +144,6 @@ class Circle extends Shape {
 			context.fillStyle = this.color	
 			context.strokeStyle = this.color	
 		}		
-
 		context.beginPath()
 		context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
 		context.stroke()
@@ -203,7 +153,6 @@ class Circle extends Shape {
 	drawOutline(context:CanvasRenderingContext2D) {
 		context.strokeStyle = this.selectionColor
 		context.lineWidth = this.strokeWidth
-
 		context.beginPath()
 		context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
 		context.stroke()
@@ -212,7 +161,6 @@ class Circle extends Shape {
 	contains(x:number, y:number):boolean {
 		let translatedX:number = x - this.x 
 		let translatedY:number = y - this.y
-
 		if (translatedX*translatedX + translatedY*translatedY < this.radius * this. radius) {
 			return true 
 		} else {
@@ -238,15 +186,11 @@ class Star extends Shape {
 		super(x, y, rotation)
 		this.radius = radius
 		this.points = points
-
 		this.minRadius = 40
 		this.innerRadius = this.radius * 1 / 2
-
 		this.color = "#FFFF1A"
-		// this.color = "#000000"
 		this.selectionColor = "#999900"
 		this.hoverColor = "#E6E600"
-
 		this._type = "STAR"
 	}
 
@@ -276,20 +220,12 @@ class Star extends Shape {
 
 
 	contains(x:number, y:number):boolean {
-		
-		
-
 		let translatedX:number = x - this.x 
 		let translatedY:number = y - this.y 
 		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
 		if (radius <= this.innerRadius) {return true}
 		let angle:number = translatedX>0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)// + this.rotation
-		
-		angle += 2*Math.PI
-		angle = angle % (2*Math.PI) 
-	
-		// angle = (angle + (3*Math.PI/2)) % (2*Math.PI)
-
+		angle = (angle + 2*Math.PI) % (2*Math.PI) // Simply makes the intervale [0, 2PI)
 		let closestAngle:number = 0
 		let distance:number = 100 // arbitry high number
 
@@ -298,9 +234,6 @@ class Star extends Shape {
 
 		for (let i = 0; i < this.points; i++) {
 			startingAngle = (startingAngle + step) % (2*Math.PI)
-			// console.log("Starting Angle: "+startingAngle)
-			// let dis:number = (angle - startingAngle) % (2*Math.PI)
-			// let dis:number = (startingAngle - angle) % (2*Math.PI)
 			let dis:number = this.getShorterDifferenceAroundCircle(startingAngle, angle)
 
 			let absDis:number = Math.abs(dis)
@@ -310,42 +243,11 @@ class Star extends Shape {
 			}
 		}
 
-		// context.beginPath()
-		// context.moveTo(this.x, this.y)
-		// // context.lineTo(x, y)
-		// context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
-		// context.strokeStyle = "#CC0000"
-		// context.stroke()
-
-		// // context.beginPath()
-		// // context.moveTo(this.x + this.radius*Math.cos(startingAngle), this.y + this.radius*Math.sin(startingAngle))
-		// // context.lineTo(this.x, this.y)
-		// // context.strokeStyle = "#0066FF"
-		// // context.stroke()
-
-		// context.beginPath()
-		// context.strokeStyle = "#CC08800"
-		// context.moveTo(this.x + this.radius*Math.cos(closestAngle), this.y + this.radius*Math.sin(closestAngle))
-		// context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
-		
-		// context.stroke()
-	
-		// console.log("Angle and Rad: " + angle + " " + radius)
-		// console.log("Angle: " + angle)
-		// console.log("Closest Angle: " + closestAngle)
-		// console.log("dif: " + distance)
-		// console.log("Pi over 5: " + Math.PI/5)
-
 		if (distance < 0) {
-		// if (section % 2 == 1) {
-			// console.log("Distance: " + distance)
-			// console.log("HL rad of star: " + this.highToLowRadius(angle + 3*Math.PI/2))
 			if (radius <=  this.highToLowRadius(angle - closestAngle)) {
 				return true
 			}
 		} else {
-			// console.log("Distance: " + distance)
-			// console.log("LH rad of star: " + this.lowToHighRadius(angle + 3*Math.PI/2))
 			if (radius <= this.lowToHighRadius(angle - closestAngle)) {
 				return true
 			}
@@ -364,18 +266,11 @@ class Star extends Shape {
 		return dif1
 	}
 
-	// cartesianToPolar(x:number, y:number):number {
-	// 	if ()
-	// }
-
-	// Fix these to be point independent
 	highToLowRadius(angle:number):number {
-		// return (5/Math.PI*(this.innerRadius - this.radius)*angle + this.innerRadius + 17/2*(this.radius - this.innerRadius))
 		return this.points/Math.PI*(this.innerRadius - this.radius)*angle + this.radius
 	}
 
 	lowToHighRadius(angle:number):number {
-		// return (5/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius - 17/2*(this.radius - this.innerRadius))
 		return this.points/Math.PI*(this.radius - this.innerRadius)*angle + this.radius
 	}	
 
@@ -393,13 +288,10 @@ class Triangle extends Shape {
 		super(x, y, rotation)
 		this.radius = radius
 		this.points = 3
-
 		this.minRadius = 40
-
 		this.color = "#00FF00"
 		this.selectionColor = "#008000"
 		this.hoverColor = "#00CC00"
-
 		this._type = "TRIANGLE"
 	}
 
@@ -428,7 +320,6 @@ class Triangle extends Shape {
 
 	// Method borrowed from https://www.gamedev.net/forums/topic/295943-is-this-a-better-point-in-triangle-test-2d/
 	contains(x:number, y:number):boolean {
-		// console.log(this.getTrianglePoints())
 		let points:number[] = this.getTrianglePoints() 
 		if (points.length < 6) {return false}
 
@@ -436,12 +327,6 @@ class Triangle extends Shape {
 		let area1:number = this.calcTriArea(x, y, points[2], points[3], points[4], points[5])
 		let area2:number = this.calcTriArea(points[0], points[1], x, y, points[4], points[5])
 		let area3:number = this.calcTriArea(points[0], points[1], points[2], points[3], x, y)
-
-
-		// console.log("Total: " + totalArea)
-		// console.log("area1: " + area1)
-		// console.log("area2: " + area2)
-		// console.log("area3: " + area3)
 
 		if ((area1 + area2 + area3) > totalArea + 0.5) {
 			return false

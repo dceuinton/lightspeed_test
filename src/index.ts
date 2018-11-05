@@ -1,7 +1,4 @@
 import {LSCanvas} from "./LSCanvas"
-// import {Rectangle} from "./Shapes"
-// import {Star} from "./Shapes"
-// import {LSCanvasButton} from "./Buttons"
 import {LSCanvasRotationButton} from "./Buttons"
 import {LSCanvasRectangleButton} from "./Buttons"
 import {LSCanvasCircleButton} from "./Buttons"
