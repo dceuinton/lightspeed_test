@@ -274,52 +274,97 @@ class Star extends Shape {
 	}
 
 
-	contains(x:number, y:number):boolean {
+	contains(x:number, y:number, context:CanvasRenderingContext2D):boolean {
+		
+		
+
 		let translatedX:number = x - this.x 
 		let translatedY:number = y - this.y 
-		let distance:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
-		if (distance <= this.innerRadius) {return true}
-		// let angle:number = Math.atan(translatedY/translatedX)
-		// // console.log(angle*180/Math.PI)
-		// let translatedRotatedX:number = distance * Math.cos(angle - this.rotation)
-		// let translatedRotatedY:number = distance * Math.sin(angle - this.rotation)
-		// angle = Math.atan(translatedRotatedY/translatedRotatedX)
+		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
+		if (radius <= this.innerRadius) {return true}
+		let angle:number = translatedX>0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)// + this.rotation
 		
-		// // console.log(angle)
-		// // console.log()
+		
+	
+		// angle = (angle + (3*Math.PI/2)) % (2*Math.PI)
 
-		// // angle = (Math.PI / 2) + (angle % (2 * Math.PI / 5))
-		// angle = (angle + (3*Math.PI/2)) % Math.PI/5
-		// console.log("Angle and Rad: " + angle + " " + distance)
+		let closestAngle:number = 0
+		let distance:number = 100 // arbitry high number
 
-		// if (angle < Math.PI/10) {
-		// 	console.log("Distance: " + distance)
-		// 	console.log("rad of star: " + this.highToLowRadius(angle + 3*Math.PI/2))
-		// 	if (distance <=  this.highToLowRadius(angle + 3*Math.PI/2)) {
-		// 		return true
-		// 	}
-		// } else {
-		// 	console.log("Distance: " + distance)
-		// 	console.log("rad of star: " + this.lowToHighRadius(angle + 3*Math.PI/2))
-		// 	if (distance <= this.lowToHighRadius(angle + 3*Math.PI/2)) {
-		// 		return true
-		// 	}
-		// }
+		let startingAngle:number = 3*Math.PI/2 + this.rotation
+
+		for (let i = 0; i < this.points; i++) {
+			startingAngle = (startingAngle + i*2*Math.PI/this.points) % (2*Math.PI)
+			console.log("Starting Angle: "+startingAngle)
+			let dis:number = angle - startingAngle
+			let absDis:number = Math.abs(dis)
+			if (absDis < distance) {
+				distance = absDis 
+				closestAngle = startingAngle
+			}
+		}
+
+		context.beginPath()
+		context.moveTo(this.x, this.y)
+		// context.lineTo(x, y)
+		context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
+		context.strokeStyle = "#CC0000"
+		context.stroke()
+
+		// context.beginPath()
+		// context.moveTo(this.x + this.radius*Math.cos(startingAngle), this.y + this.radius*Math.sin(startingAngle))
+		// context.lineTo(this.x, this.y)
+		// context.strokeStyle = "#0066FF"
+		// context.stroke()
+
+		context.beginPath()
+		context.strokeStyle = "#CC08800"
+		context.moveTo(this.x + this.radius*Math.cos(closestAngle), this.y + this.radius*Math.sin(closestAngle))
+		context.lineTo(this.x + radius*Math.cos(angle), this.y + radius*Math.sin(angle))
+		
+		context.stroke()
+	
+		// console.log("Angle and Rad: " + angle + " " + radius)
+		console.log("Angle: " + angle)
+		console.log("Closest Angle: " + closestAngle)
+		console.log("dif: " + distance)
+		console.log("Pi over 5: " + Math.PI/5)
+
+		if (distance < Math.PI/(this.points*2)) {
+		// if (section % 2 == 1) {
+			// console.log("Distance: " + distance)
+			// console.log("HL rad of star: " + this.highToLowRadius(angle + 3*Math.PI/2))
+			if (radius <=  this.highToLowRadius(angle + closestAngle)) {
+				return true
+			}
+		} else {
+			// console.log("Distance: " + distance)
+			// console.log("LH rad of star: " + this.lowToHighRadius(angle + 3*Math.PI/2))
+			if (radius <= this.lowToHighRadius(angle + closestAngle)) {
+				return true
+			}
+		}
 		return false
-
-
 	}
 
+	// cartesianToPolar(x:number, y:number):number {
+	// 	if ()
+	// }
+
+	// Fix these to be point independent
 	highToLowRadius(angle:number):number {
-		return (5/Math.PI*(this.innerRadius - this.radius)*angle + this.innerRadius + 17/2*(this.radius - this.innerRadius))
+		// return (5/Math.PI*(this.innerRadius - this.radius)*angle + this.innerRadius + 17/2*(this.radius - this.innerRadius))
+		return this.points/Math.PI*(this.innerRadius - this.radius)*angle + this.radius
 	}
 
 	lowToHighRadius(angle:number):number {
-		return (5/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius - 17/2*(this.radius - this.innerRadius))
+		// return (5/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius - 17/2*(this.radius - this.innerRadius))
+		return this.points/Math.PI*(this.radius - this.innerRadius)*angle + this.innerRadius
 	}	
 
 	scale(delta:number):void {
 		this.radius += delta;
+		this.innerRadius = this.radius/2
 		if (this.radius < this.minRadius) {this.radius = this.minRadius}
 	}
 }
