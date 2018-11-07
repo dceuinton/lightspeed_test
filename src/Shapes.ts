@@ -212,25 +212,10 @@ class Star extends Shape {
 		this.selectionColor = "#999900"
 		this.hoverColor = "#E6E600"
 		this._type = "STAR"
-
-		// let step:number = 2*Math.PI/this.nVertices
-		// let angle:number = 3*Math.PI/2 + this.rotation
-		// for (let i = 0; i < this.points; i++) {
-		// 	this.xVertices.push(this.x + this.radius * Math.cos(angle))
-		// 	this.yVertices.push(this.y + this.radius * Math.sin(angle))
-		// 	angle += step 
-		// 	this.xVertices.push(this.x + this.innerRadius * Math.cos(angle))
-		// 	this.yVertices.push(this.y + this.innerRadius * Math.sin(angle))
-		// 	angle += step 
-		// }
-
 		this.setStarVertices()
-
-		this.pointInPoly();
-		console.log(this.xVertices)
-		console.log(this.yVertices)
 	}
 
+	// Allows updating of the vertices
 	setStarVertices() {
 		this.xVertices = []
 		this.yVertices = []
@@ -249,13 +234,7 @@ class Star extends Shape {
 	updatePosition(x:number, y:number) {
 		this.x = x 
 		this.y = y 
-		let xDif = x - this.x 
-		let yDif = y - this.y 
-
-		for (let i:number = 0; i < this.nVertices; i++) {
-			this.xVertices[i] += xDif
-			this.yVertices[i] += yDif			
-		}
+		this.setStarVertices()
 	}
 
 	draw(context:CanvasRenderingContext2D):void {
@@ -282,54 +261,24 @@ class Star extends Shape {
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	}
 
-	// This method still needs to be debugged, not yet perfect 
-	// Idea is to turn the star's radius into a function of theta 
-	// and check to see whether the point x, y at theta has a smaller radius than the function
+	// Utilise point in polygon method 
 	contains(x:number, y:number):boolean {
-		let translatedX:number = x - this.x 
-		let translatedY:number = y - this.y 
-		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
-		if (radius <= this.innerRadius) {return true}		// Cuts the method short if the point is in the inner radius
-
-		let angle:number = translatedX > 0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)		// Ensures we get the full 360 degrees
-		angle = (angle + 2*Math.PI) % (2*Math.PI)		// Simply makes the intervale [0, 2PI)
-		let closestAngle:number = 0
-		let distance:number = 100		// arbitry high number
-
-		let startingAngle:number = 3*Math.PI/2 + this.rotation		// Start same place we start drawing
-		let step:number = 2*Math.PI/this.points
-
-		// Loop finds the point in the star that is closest to the angle of point (x, y)
-		for (let i = 0; i < this.points; i++) {
-			startingAngle = (startingAngle + step) % (2*Math.PI)
-			let dis:number = this.getShorterDifferenceAroundCircle(startingAngle, angle)
-
-			let absDis:number = Math.abs(dis)
-			if (absDis < Math.abs(distance)) {
-				distance = dis 
-				closestAngle = startingAngle
-			}
-		}
-
-		// Checks the radius against my functions 
-		if (distance < 0) {
-			if (radius <=  this.highToLowRadius(angle - closestAngle)) {
-				return true
-			}
-		} else {
-			if (radius <= this.lowToHighRadius(angle - closestAngle)) {
-				return true
-			}
-		}
-		return false
+		return this.pointInPoly(x,y)
 	}
 
-	pointInPoly() {
-		let i:number = 0, j:number = 0, c:number = 0
-		for (i = 0, j = this.points - 1; i < this.points; j = i++) {
-			console.log("i: " + i + " " + c)
-			console.log("j: " + j + " " + c)
+	// Point in polygon method
+	// I found this implementation https://stackoverflow.com/questions/11716268/point-in-polygon-algorithm, although looking around there are many
+	// Checks first to see if the point is in between the end poinst of the edge its checking against in the y direction
+	// Then it checks to see if the point is to the left of the edge, if so it ticks the boolean counter
+	pointInPoly(x:number, y:number):boolean{
+		let i:number = 0, j:number = 0, ret:boolean = false
+		for (i = 0, j = this.nVertices - 1; i < this.nVertices; j = i++) {
+			if (((this.yVertices[i] > y) != (this.yVertices[j] > y)) &&
+				(x < (this.xVertices[j] - this.xVertices[i]) * (y - this.yVertices[i])/(this.yVertices[j] - this.yVertices[i]) + this.xVertices[i])) {
+				ret = !ret
+			}
 		}
+		return ret
 	}
 
 	// Purpose: To find the distance between two angles around a circle
