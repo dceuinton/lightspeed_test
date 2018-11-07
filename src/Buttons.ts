@@ -48,6 +48,7 @@ class LSCanvasRotationButton extends LSCanvasButton {
 		this.mClockwise = clockwise
 	}
 
+	// Continually calls rotateSelection until mouse is released on the button 
 	mouseDown = () => {
 		if (this.mCanvas.selection) {
 			this.mIntervalID = setInterval(this.rotateSelection, this.mIntervalTime)

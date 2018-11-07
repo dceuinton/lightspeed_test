@@ -30,7 +30,7 @@ class Shape {
 		this.strokeWidth = 3
 		this.beingHovered = false 
 		this.scalingFactor = 0.1
-		this._type = "SHAPE"
+		this._type = "SHAPE"					// Used to determine which types in an array of mixed shapes
 		this.width = 0
 		this.height = 0
 		this.radius = 0
@@ -92,6 +92,8 @@ class Rectangle extends Shape {
 		context.setTransform(1, 0, 0, 1, 0, 0)
 	}
 
+	// This method simply translates and rotates the mouse point to and around the center of the 
+	// rectangle and checks to see if the final point is inside the rectangle or not
 	contains(x:number, y:number):boolean {
 		let translatedX:number = x - (this.x + this.width/2)
 		let translatedY:number = y - (this.y + this.height/2)
@@ -110,6 +112,7 @@ class Rectangle extends Shape {
 		}
 	}
 
+	// Scales from center of rectangle
 	scale(delta:number):void {
 		let midX:number = this.x + this.width/2
 		let midY:number = this.y + this.height/2
@@ -226,20 +229,22 @@ class Star extends Shape {
 
 	// This method still needs to be debugged, not yet perfect 
 	// Idea is to turn the star's radius into a function of theta 
-	// and check to see whether the point x, y at theta has a smaller radius 
+	// and check to see whether the point x, y at theta has a smaller radius than the function
 	contains(x:number, y:number):boolean {
 		let translatedX:number = x - this.x 
 		let translatedY:number = y - this.y 
 		let radius:number = Math.sqrt(translatedX * translatedX + translatedY * translatedY)
-		if (radius <= this.innerRadius) {return true}
-		let angle:number = translatedX>0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)// + this.rotation
-		angle = (angle + 2*Math.PI) % (2*Math.PI) // Simply makes the intervale [0, 2PI)
-		let closestAngle:number = 0
-		let distance:number = 100 // arbitry high number
+		if (radius <= this.innerRadius) {return true}		// Cuts the method short if the point is in the inner radius
 
-		let startingAngle:number = 3*Math.PI/2 + this.rotation
+		let angle:number = translatedX > 0 ? Math.atan(translatedY/translatedX) : Math.PI + Math.atan(translatedY/translatedX)		// Ensures we get the full 360 degrees
+		angle = (angle + 2*Math.PI) % (2*Math.PI)		// Simply makes the intervale [0, 2PI)
+		let closestAngle:number = 0
+		let distance:number = 100		// arbitry high number
+
+		let startingAngle:number = 3*Math.PI/2 + this.rotation		// Start same place we start drawing
 		let step:number = 2*Math.PI/this.points
 
+		// Loop finds the point in the star that is closest to the angle of point (x, y)
 		for (let i = 0; i < this.points; i++) {
 			startingAngle = (startingAngle + step) % (2*Math.PI)
 			let dis:number = this.getShorterDifferenceAroundCircle(startingAngle, angle)
@@ -251,6 +256,7 @@ class Star extends Shape {
 			}
 		}
 
+		// Checks the radius against my functions 
 		if (distance < 0) {
 			if (radius <=  this.highToLowRadius(angle - closestAngle)) {
 				return true
@@ -263,7 +269,9 @@ class Star extends Shape {
 		return false
 	}
 
-	// inputs must both be positive
+	// Purpose: To find the distance between two angles around a circle
+	// i.e. distances should take into account that 0.1 and 6 have a shorter distance of 0.38, not 5.9
+	// requirement: inputs must both be positive
 	getShorterDifferenceAroundCircle(angle1:number, angle2:number):number {
 		let dif1:number = angle1 - angle2
 		if ((2*Math.PI - angle1 + angle2) * (2*Math.PI - angle1 + angle2) < dif1*dif1) {

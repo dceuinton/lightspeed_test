@@ -13,7 +13,7 @@ import {Triangle} from "./Shapes"
 
 // Attribution:
 // Borrowed a skeleton of LSCanvas from https://simonsarris.com/making-html5-canvas-useful/ 
-// This particularly influenced the getMouse and draw methods
+// This particularly influenced the getMouse, draw, and a couple of the mouse listeners
 
 const CSS_STYLE_PADDING_LEFT:number = 102
 const CSS_STYLE_PADDING_TOP:number = 104

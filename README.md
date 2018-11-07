@@ -31,9 +31,9 @@ Add shapes to the LSCanvas through its addShape(shape) method and remove them wi
 
 #### Justification
 
-Building the project around LSCanvas resembles a really basic game engine design (to me at least). I see this as a simple and effective way to handle an object that needs to be drawn many times and needs an ways to manage input and output to the user.
+Building the project around LSCanvas resembles a really basic game engine design (to me at least). I see this as a simple and effective way to handle a bunch object that needs to be drawn many times, in sync, and that need ways to manage input and output to the user. 
 
-It is now easy to add in new shapes, delete them, and to manipulate them, and this design pattern worked well for me. 
+This interface has makes it easy to add in new shapes, delete them, and to manipulate them, and this design pattern worked well for me. 
 
 ### Shape 
 
@@ -60,13 +60,23 @@ This makes it easier to deal with a bunch of shapes as they now have defined tra
 
 This button class implements listeners for clicks and determines actions to be taken for each type of button. There are two types of button I have implemented: a rotation button, LSCanvasRotationButton and the LSCanvas\*Buttons which create whatever shape they are named after. Again, I have used an inheritence hierachy to define the buttons. To create a new sort of button with a simple `mousedown` and `mouseup` listener, you just have to implement LSCanvasButton and define the mouseDown() and mouseUp() methods. 
 
+Particularly important methods: 
+
+* `init()` - Where all the event listeners are set up
+* `draw()` - Where the canvas cycles through shapes and draws them - this method has to be called on repeat to continually draw the class
+* `getMouse()` - Returns an (x, y) in class MouseLocation that takes into account hmtl padding and other aspects that throw off mouse accuracy
+
 ## Areas to be improved upon
 
 One area that I know is not correct is the Star class' contains function. I was attempting to turn the radius into a function of theta and check whether the radius of point(x, y) was less than that, but haven't fully managed to get it working yet. It is working a little, but it's still a bit buggy. 
 
-Other than that, I know that my testing needs to be developed. I've implemented some basic tests for the contains methods in the Shapes classes but these are all fairly basic and could definitely be improved and further testing can be implemented for other functions and classes. 
+I also became aware quite far through the project that I could create my own html tags for buttons. This sounds like a more elegant way to create the buttons and done again, I would give this a go. 
 
-Any feedback at all is appreciated, on these and anything else around this project.
+Other than that, I know that my testing needs to be developed. I've implemented some basic tests for the contains methods in the Shapes classes but these are all fairly basic and could definitely be improved and further testing can be implemented for other functions and classes. Done again, I would write the tests as I go, not right at the end. 
+
+Any feedback at all is appreciated, on these and anything else around this project. I am very new to typescript and javascript and I'm sure most of the things I don't know, I don't know that I don't know them. So, even a few points in the right direction will help.
+
+## Thanks! 
 
 
 

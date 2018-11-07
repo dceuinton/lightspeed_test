@@ -7,23 +7,30 @@
     <link href="./styles.css" rel="stylesheet" />
   </head>
   <body>
-    <h1>Hello, world</h1>
-
-    <table>
-    	<tr>
-    		<button id=btnRotateClockwise>Rotate Clockwise</button>
-			<button id=btnRotateAntiClockwise>Rotate Anti-Clockwise</button>
-			<button id=btnCreateSquare>Square</button>
-			<button id=btnCreateCircle>Circle</button>
-			<button id=btnCreateStar>Star</button>
-			<button id=btnCreateTriangle>Triangle</button>
-    	</tr>
-    	<tr>
-    		<canvas id = "canvas" width = 800 height = 600 style = "border : 1px solid black;"></canvas>		
-    	</tr>
-
-    </table>   
-
+    <h1>Light Speed Graphics Technical Test</h1>
+    <div class="Table">
+      <div class="Row">
+        <div class="Cell">
+          <button id=btnRotateClockwise>Rotate Clockwise</button>
+          <button id=btnRotateAntiClockwise>Rotate Anti-Clockwise</button>
+          <button id=btnCreateSquare>Square</button>
+          <button id=btnCreateCircle>Circle</button>
+          <button id=btnCreateStar>Star</button>
+          <button id=btnCreateTriangle>Triangle</button>
+        </div>
+      </div>
+      <div class="Row">
+        <div class="Cell">
+          <canvas id = "canvas" width = 800 height = 600 style = "border : 1px solid black;"></canvas>  
+        </div>        
+      </div>
+    </div>
+    <p>To use this program, select a shape button and click on it. A shape will appear depending on which button you press.</p>
+    <p><b>  Controls: </b><br>
+       &emsp;<b>Left click:</b> Selection, hold down to drag<br>
+       &emsp;<b>Right click:</b> While a shape is selected, it will duplicate it<br>
+       &emsp;<b>Mouse wheel:</b> While a shape is selected, it will scale it<br>
+       &emsp;<b>Double click:</b> Deletes shape</p>
     <script src="./index.js"></script>
   </body>
 </html>
