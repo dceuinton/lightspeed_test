@@ -37,6 +37,11 @@ class Shape {
 		this.points = 0
 	}
 
+	updatePosition(x:number, y:number):void {
+		this.x = x 
+		this.y = y
+	}
+
 	draw(context:CanvasRenderingContext2D):void {console.log(context)}
 
 	drawOutline(context:CanvasRenderingContext2D):void {console.log(context)}
@@ -190,17 +195,67 @@ class Star extends Shape {
 
 	minRadius:number
 	innerRadius:number
+	xVertices:number[]
+	yVertices:number[]
+	nVertices:number
 
 	constructor(x:number, y:number, radius:number, points:number, rotation:number) {
 		super(x, y, rotation)
 		this.radius = radius
 		this.points = points
+		this.nVertices = this.points * 2
+		this.xVertices = []
+		this.yVertices = []
 		this.minRadius = 40
 		this.innerRadius = this.radius * 1 / 2
 		this.color = "#FFFF1A"
 		this.selectionColor = "#999900"
 		this.hoverColor = "#E6E600"
 		this._type = "STAR"
+
+		// let step:number = 2*Math.PI/this.nVertices
+		// let angle:number = 3*Math.PI/2 + this.rotation
+		// for (let i = 0; i < this.points; i++) {
+		// 	this.xVertices.push(this.x + this.radius * Math.cos(angle))
+		// 	this.yVertices.push(this.y + this.radius * Math.sin(angle))
+		// 	angle += step 
+		// 	this.xVertices.push(this.x + this.innerRadius * Math.cos(angle))
+		// 	this.yVertices.push(this.y + this.innerRadius * Math.sin(angle))
+		// 	angle += step 
+		// }
+
+		this.setStarVertices()
+
+		this.pointInPoly();
+		console.log(this.xVertices)
+		console.log(this.yVertices)
+	}
+
+	setStarVertices() {
+		this.xVertices = []
+		this.yVertices = []
+		let step:number = 2*Math.PI/this.nVertices
+		let angle:number = 3*Math.PI/2 + this.rotation
+		for (let i = 0; i < this.points; i++) {
+			this.xVertices.push(this.x + this.radius * Math.cos(angle))
+			this.yVertices.push(this.y + this.radius * Math.sin(angle))
+			angle += step 
+			this.xVertices.push(this.x + this.innerRadius * Math.cos(angle))
+			this.yVertices.push(this.y + this.innerRadius * Math.sin(angle))
+			angle += step 
+		}
+	}
+
+	updatePosition(x:number, y:number) {
+		this.x = x 
+		this.y = y 
+		let xDif = x - this.x 
+		let yDif = y - this.y 
+
+		for (let i:number = 0; i < this.nVertices; i++) {
+			this.xVertices[i] += xDif
+			this.yVertices[i] += yDif			
+		}
 	}
 
 	draw(context:CanvasRenderingContext2D):void {
@@ -269,6 +324,14 @@ class Star extends Shape {
 		return false
 	}
 
+	pointInPoly() {
+		let i:number = 0, j:number = 0, c:number = 0
+		for (i = 0, j = this.points - 1; i < this.points; j = i++) {
+			console.log("i: " + i + " " + c)
+			console.log("j: " + j + " " + c)
+		}
+	}
+
 	// Purpose: To find the distance between two angles around a circle
 	// i.e. distances should take into account that 0.1 and 6 have a shorter distance of 0.38, not 5.9
 	// requirement: inputs must both be positive
@@ -294,6 +357,12 @@ class Star extends Shape {
 		this.radius += delta;
 		this.innerRadius = this.radius/2
 		if (this.radius < this.minRadius) {this.radius = this.minRadius}
+		this.setStarVertices()
+	}
+
+	rotate(radians:number) {
+		this.rotation += (radians % (2 * Math.PI))
+		this.setStarVertices()
 	}
 }
 

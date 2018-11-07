@@ -4,7 +4,7 @@ import {LSCanvasRectangleButton} from "./Buttons"
 import {LSCanvasCircleButton} from "./Buttons"
 import {LSCanvasStarButton} from "./Buttons"
 import {LSCanvasTriangleButton} from "./Buttons"
-import {Rectangle} from "./Shapes"
+// import {Rectangle} from "./Shapes"
 
 let lsCanvas:LSCanvas = new LSCanvas(<HTMLCanvasElement>document.getElementById("canvas"))
 lsCanvas.init()
@@ -34,5 +34,5 @@ btnCreateTriangle.init()
 
 setInterval(function() {lsCanvas.draw()}, lsCanvas.timeInterval)
 
-let r:Rectangle = new Rectangle(0, 0, 50, 50, 0)
-console.log("Contains: " + r.contains(25, 25))
+// let r:Rectangle = new Rectangle(0, 0, 50, 50, 0)
+// console.log("Contains: " + r.contains(25, 25))

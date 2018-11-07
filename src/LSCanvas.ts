@@ -180,9 +180,9 @@ class LSCanvas {
 		// or a shape is being dragged 
 		this.canvas.addEventListener('mousemove', function(e:MouseEvent) {
 			let mouse:MouseLocation = mCanvas.getMouse(e)
+			// console.log(mouse)
 			if (mCanvas.dragging && mCanvas.liveSelection()) {				
-				mCanvas.selection.x = mouse.x - mCanvas.dragOffsetX
-				mCanvas.selection.y = mouse.y - mCanvas.dragOffsetY
+				mCanvas.selection.updatePosition(mouse.x - mCanvas.dragOffsetX, mouse.y - mCanvas.dragOffsetY)
 				mCanvas.valid = false
 				return
 			} 
@@ -211,7 +211,7 @@ class LSCanvas {
 											   mouse.y - mCanvas.selection.height/2, 
 											   mCanvas.selection.width, 
 											   mCanvas.selection.height, 
-											   0))
+											   mCanvas.selection.rotation))
 					break;
 					case "CIRCLE":
 					mCanvas.addShape(new Circle(mouse.x, mouse.y, mCanvas.selection.radius))
