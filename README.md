@@ -68,7 +68,7 @@ Particularly important methods:
 
 ## Areas to be improved upon
 
-One area that I know is not correct is the Star class' contains function. I was attempting to turn the radius into a function of theta and check whether the radius of point(x, y) was less than that, but haven't fully managed to get it working yet. It is working a little, but it's still a bit buggy. 
+**Now fixed after email from Richard:**One area that I know is not correct is the Star class' contains function. I was attempting to turn the radius into a function of theta and check whether the radius of point(x, y) was less than that, but haven't fully managed to get it working yet. It is working a little, but it's still a bit buggy. 
 
 I also became aware quite far through the project that I could create my own html tags for buttons. This sounds like a more elegant way to create the buttons and done again, I would give this a go. 
 

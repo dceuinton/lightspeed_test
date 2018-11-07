@@ -2,8 +2,6 @@
 // Purpose: To hold shape data and provide means of drawing them 
 // Shape is the superclass and all specific shapes should implement to shape
 
-// Notes: Star.contains(x,y) is not fully functional 
-
 class Shape {
 	x:number 
 	y:number
